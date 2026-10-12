@@ -412,31 +412,48 @@ switch ($action) {
             $headers[] = "Authorization: token {$token}";
         }
 
-        $context = stream_context_create([
-            'http' => [
-                'method'        => 'GET',
-                'header'        => implode("\r\n", $headers),
-                'timeout'       => 10,
-                'ignore_errors' => true
-            ],
-            'ssl' => [
-                'verify_peer'      => false,
-                'verify_peer_name' => false
-            ]
-        ]);
-
-        $response = @file_get_contents($apiUrl, false, $context);
+        $response = null;
         $statusCode = 200;
-        if (isset($http_response_header)) {
-            foreach ($http_response_header as $hdr) {
-                if (preg_match('/^HTTP\/\S+\s+(\d+)/', $hdr, $m)) {
-                    $statusCode = (int)$m[1];
-                    break;
+
+        if (function_exists('curl_init')) {
+            $ch = curl_init($apiUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 12);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($ch, CURLOPT_USERAGENT, 'StreamManagerPro-OTA-Updater/2.7');
+            $response = curl_exec($ch);
+            $statusCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+        } else {
+            $context = stream_context_create([
+                'http' => [
+                    'method'        => 'GET',
+                    'header'        => implode("\r\n", $headers),
+                    'timeout'       => 10,
+                    'ignore_errors' => true
+                ],
+                'ssl' => [
+                    'verify_peer'      => false,
+                    'verify_peer_name' => false
+                ]
+            ]);
+
+            $response = @file_get_contents($apiUrl, false, $context);
+            if (isset($http_response_header)) {
+                foreach ($http_response_header as $hdr) {
+                    if (preg_match('/^HTTP\/\S+\s+(\d+)/', $hdr, $m)) {
+                        $statusCode = (int)$m[1];
+                        break;
+                    }
                 }
             }
         }
 
-        if ($statusCode === 404 || $statusCode === 409 || $response === false || (is_string($response) && strpos($response, 'Git Repository is empty') !== false)) {
+        $commitData = @json_decode($response, true);
+
+        if ($statusCode === 404 || $statusCode === 409 || ($commitData && isset($commitData['message']) && stripos($commitData['message'], 'empty') !== false)) {
             // Puede ser un repo recién creado o sin commits aún
             jsonResponse([
                 'success'          => true,
@@ -461,7 +478,6 @@ switch ($action) {
             break;
         }
 
-        $commitData = @json_decode($response, true);
         if (!$commitData || empty($commitData['sha'])) {
             jsonResponse([
                 'success'          => true,
