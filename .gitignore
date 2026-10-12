@@ -1,0 +1,16 @@
+# StreamManager Pro - .gitignore
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editores
+.vscode/
+.idea/
+
+# Carpetas temporales y descargas
+/tmp/
+/temp/
+login_preview.png
+screenshot.png
+preview.png

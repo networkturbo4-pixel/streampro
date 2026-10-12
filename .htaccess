@@ -1,0 +1,27 @@
+# StreamManager Pro - PWA Apache Configuration
+
+# 1. Asegurar MIME type correcto para manifest.webmanifest
+<IfModule mod_mime.c>
+    AddType application/manifest+json .webmanifest
+    AddType application/json .json
+    AddType image/svg+xml .svg
+</IfModule>
+
+# 2. Control de Caché para Service Worker (siempre fresco para detectar updates)
+<IfModule mod_headers.c>
+    <Files "sw.js">
+        Header set Service-Worker-Allowed "/"
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires 0
+    </Files>
+
+    <FilesMatch "\.(webmanifest|json)$">
+        Header set Cache-Control "public, max-age=3600"
+    </FilesMatch>
+</IfModule>
+
+# 3. Compresión Gzip (si está habilitado mod_deflate)
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/json application/javascript text/javascript image/svg+xml application/manifest+json
+</IfModule>

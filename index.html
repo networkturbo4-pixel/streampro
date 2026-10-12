@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Sistema profesional e inteligente de administración de cuentas, perfiles y clientes de streaming.">
+    
+    <!-- PWA Meta Tags & Colors -->
+    <meta name="theme-color" content="#080c14">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="StreamPRO">
+    <meta name="application-name" content="StreamManager Pro">
+    <meta name="msapplication-TileColor" content="#080c14">
+    <meta name="msapplication-TileImage" content="assets/icons/icon-144x144.png">
+
+    <!-- PWA Web App Manifest -->
+    <link rel="manifest" href="manifest.webmanifest">
+
+    <!-- Favicons & App Icons -->
+    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
+
+    <title>StreamManager Pro - Sistema de Administración de Cuentas Streaming</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- CSS del Sistema -->
+    <link rel="stylesheet" href="assets/css/style.css?v=2.7.0">
+</head>
+<body>
+
+    <!-- =====================================================================
+         1. VISTA DE LOGIN REDISEÑADA (PREMIUM SAAS STREAMING HUB)
+         ===================================================================== -->
+    <div id="view-login" class="login-view-wrapper">
+        <!-- Fondos y Efectos de Luz Dinámica -->
+        <div class="login-bg-decorations" aria-hidden="true">
+            <div class="login-glow-orb orb-1"></div>
+            <div class="login-glow-orb orb-2"></div>
+            <div class="login-glow-orb orb-3"></div>
+            <div class="login-grid-pattern"></div>
+        </div>
+        
+        <div class="login-container">
+            <div class="login-card animate-fade-in">
+                <!-- Header con Insignia de Estado y Logo Iluminado -->
+                <div class="login-header">
+                    <div class="login-status-chip">
+                        <span class="status-pulse-dot"></span>
+                        <span class="chip-text">STREAMING MANAGEMENT CLOUD</span>
+                        <span class="chip-version">v2.6</span>
+                    </div>
+
+                    <div class="brand-icon-box">
+                        <div class="brand-icon-glow"></div>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                    </div>
+
+                    <h1 class="login-title">
+                        StreamManager <span class="badge-pro">PRO</span>
+                    </h1>
+                    <p class="login-subtitle">Gestión inteligente y centralizada de suscripciones, perfiles y clientes</p>
+                </div>
+
+                <!-- Formulario de Inicio de Sesión -->
+                <form id="login-form" class="login-form-content" autocomplete="on">
+                    <!-- Campo Correo -->
+                    <div class="login-field-group">
+                        <div class="login-field-header">
+                            <label for="login-email">Correo Electrónico</label>
+                            <span class="field-hint">Acceso de administrador</span>
+                        </div>
+                        <div class="login-input-box">
+                            <span class="input-icon-wrapper">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                                    <polyline points="22,6 12,13 2,6"/>
+                                </svg>
+                            </span>
+                            <input 
+                                type="email" 
+                                id="login-email" 
+                                name="email" 
+                                placeholder="tu-correo@empresa.com" 
+                                autocomplete="username" 
+                                enterkeyhint="next"
+                                required 
+                                autofocus
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Campo Contraseña -->
+                    <div class="login-field-group">
+                        <div class="login-field-header">
+                            <label for="login-password">Contraseña</label>
+                            <span class="security-indicator" title="Conexión encriptada SSL">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                </svg>
+                                <span>SSL Protegido</span>
+                            </span>
+                        </div>
+                        <div class="login-input-box">
+                            <span class="input-icon-wrapper">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                </svg>
+                            </span>
+                            <input 
+                                type="password" 
+                                id="login-password" 
+                                name="password" 
+                                placeholder="••••••••••••" 
+                                autocomplete="current-password" 
+                                enterkeyhint="done"
+                                required
+                            >
+                            <button type="button" id="btn-toggle-password" class="btn-toggle-eye" title="Mostrar u ocultar contraseña" aria-label="Mostrar u ocultar contraseña">
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Opciones adicionales: Recordar sesión -->
+                    <div class="login-options-row">
+                        <label class="remember-checkbox-label">
+                            <input type="checkbox" id="login-remember" checked>
+                            <span class="custom-check-box">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                            </span>
+                            <span class="checkbox-text">Recordar mi usuario</span>
+                        </label>
+                    </div>
+
+                    <!-- Botón de Envío -->
+                    <button type="submit" id="btn-login-submit" class="btn-login-submit">
+                        <span class="btn-text">Ingresar al Sistema</span>
+                        <svg class="btn-arrow-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
+                </form>
+
+                <!-- Pie de Seguridad y Plataformas Compatibles -->
+                <div class="login-footer-trust">
+                    <div class="trust-divider">
+                        <span>COMPATIBLE CON TUS PLATAFORMAS FAVORITAS</span>
+                    </div>
+
+                    <div class="platforms-ticker">
+                        <div class="platform-mini-tag netflix"><span class="brand-dot"></span>Netflix</div>
+                        <div class="platform-mini-tag disney"><span class="brand-dot"></span>Disney+</div>
+                        <div class="platform-mini-tag max"><span class="brand-dot"></span>Max</div>
+                        <div class="platform-mini-tag prime"><span class="brand-dot"></span>Prime Video</div>
+                        <div class="platform-mini-tag spotify"><span class="brand-dot"></span>Spotify</div>
+                        <div class="platform-mini-tag crunchy"><span class="brand-dot"></span>Crunchyroll</div>
+                    </div>
+
+                    <div class="security-footer-note">
+                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        <span>Conexión segura 256-bit AES • Acceso Exclusivo Autorizado</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- =====================================================================
+         2. APLICACIÓN PRINCIPAL (PANEL RESPONSIVE)
+         ===================================================================== -->
+    <div id="view-app" class="app-layout hidden">
+
+        <!-- Sidebar Desktop -->
+        <aside class="app-sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-brand-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </div>
+                <div class="sidebar-brand-name">Stream<span>PRO</span></div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-view="dashboard">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-view="cuentas">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+                    <span>Cuentas</span>
+                </a>
+                <a href="#" class="nav-item" data-view="perfiles">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    <span>Perfiles / Pantallas</span>
+                </a>
+                <a href="#" class="nav-item" data-view="clientes">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span>Clientes</span>
+                </a>
+                <a href="#" class="nav-item" data-view="plataformas">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                    <span>Plataformas</span>
+                </a>
+                <a href="#" class="nav-item" data-view="alertas">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    <span>Vencimientos</span>
+                    <span class="nav-badge alert-badge-count" style="display:none;">0</span>
+                </a>
+                <a href="#" class="nav-item" data-view="configuracion">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    <span>Configuración</span>
+                </a>
+            </nav>
+
+            <!-- Instalador PWA en Sidebar -->
+            <div class="sidebar-install-card pwa-install-trigger" style="display:none;">
+                <div class="sidebar-install-header">
+                    <div class="sidebar-install-icon">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    </div>
+                    <div>
+                        <div class="sidebar-install-title">StreamPRO App</div>
+                        <div class="sidebar-install-desc">Instalar en tu dispositivo</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-sidebar-install btn-pwa-install">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+                    <span>Instalar Aplicación</span>
+                </button>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-snippet">
+                    <div class="user-avatar">A</div>
+                    <div class="user-info">
+                        <div class="name current-user-name truncate">Admin</div>
+                        <div class="role current-user-email truncate">admin@stream.app</div>
+                        <div class="current-user-role truncate" style="font-size: 0.7rem; color: #818cf8; font-weight: 700; margin-top: 1px;">Super Administrador</div>
+                    </div>
+                </div>
+                <button class="btn-icon-logout btn-logout" title="Cerrar Sesión">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="app-main">
+            <!-- Top Sticky Navbar -->
+            <header class="top-navbar">
+                <div class="top-left">
+                    <div class="mobile-app-brand">
+                        <div class="mobile-brand-icon">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        </div>
+                        <div class="mobile-brand-name">Stream<span>PRO</span></div>
+                    </div>
+                    <div class="page-title-box">
+                        <h2 id="top-page-title">Resumen General</h2>
+                        <p id="top-page-subtitle">StreamManager Cloud v2.7.0</p>
+                    </div>
+                </div>
+
+                <div class="top-actions">
+                    <!-- Botón Instalar App PWA -->
+                    <button type="button" class="btn-nav-install pwa-install-trigger btn-pwa-install" style="display:none;" title="Instalar Aplicación en este Dispositivo">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <span>Instalar App</span>
+                    </button>
+                    <button class="btn-action-secondary" id="btn-new-client">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                        <span>+ Cliente</span>
+                    </button>
+                    <button class="btn-action-primary" id="btn-new-account">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <span>+ Nueva Cuenta</span>
+                    </button>
+                    <button class="btn-icon-logout btn-logout mobile-logout" title="Cerrar Sesión" style="display:none;">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    </button>
+                </div>
+            </header>
+
+            <div class="view-container">
+
+                <!-- Buscador y Filtros Globales de Barra -->
+                <div class="toolbar-bar">
+                    <div class="search-input-wrapper">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" id="global-search" placeholder="Buscar por correo, cliente, perfil, WhatsApp...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="filter-status" class="filter-select">
+                            <option value="todas">Todos los Estados</option>
+                            <option value="activa">Activas / Ocupadas</option>
+                            <option value="por_vencer">⚠️ Por Vencer (≤3 días)</option>
+                            <option value="vencida">❌ Vencidas</option>
+                            <option value="disponible">✨ Disponibles (Perfiles)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Barra de Filtros por Plataforma (Deslizable) -->
+                <div id="platform-filters" class="platform-filter-bar">
+                    <!-- Se renderiza dinámicamente con JS -->
+                </div>
+
+
+                <!-- ==============================================================
+                     SECCIÓN: 1. DASHBOARD
+                     ============================================================== -->
+                <section id="view-dashboard" class="view-section">
+                    <!-- 4 Tarjetas de Estadísticas Principales -->
+                    <div class="stats-grid">
+                        <!-- Stat: Cuentas -->
+                        <div class="stat-card">
+                            <div class="stat-card-top">
+                                <div class="stat-card-icon blue">
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+                                </div>
+                                <span class="stat-card-tag" style="background:rgba(59,130,246,0.15); color:#60a5fa;">Cuentas</span>
+                            </div>
+                            <div class="stat-val" id="dash-cuentas-total">0</div>
+                            <div class="stat-label" id="dash-cuentas-sub">0 activas</div>
+                        </div>
+
+                        <!-- Stat: Perfiles / Pantallas -->
+                        <div class="stat-card">
+                            <div class="stat-card-top">
+                                <div class="stat-card-icon purple">
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                                </div>
+                                <span class="stat-card-tag" style="background:rgba(168,85,247,0.15); color:#c084fc;">Pantallas</span>
+                            </div>
+                            <div class="stat-val" id="dash-perfiles-total">0 / 0</div>
+                            <div class="stat-label" id="dash-perfiles-sub">0 libres para venta</div>
+                            <div class="stat-progress">
+                                <div id="dash-perfiles-bar" class="stat-progress-bar" style="width: 0%; background: #a855f7;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Stat: Finanzas Estimadas -->
+                        <div class="stat-card">
+                            <div class="stat-card-top">
+                                <div class="stat-card-icon green">
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                </div>
+                                <span class="stat-card-tag" style="background:rgba(16,185,129,0.15); color:#34d399;">Ganancia Mes</span>
+                            </div>
+                            <div class="stat-val" id="dash-ganancia-total">S/ 0.00</div>
+                            <div class="stat-label" id="dash-finanzas-sub">Ingresos estimados</div>
+                        </div>
+
+                        <!-- Stat: Alertas -->
+                        <div class="stat-card">
+                            <div class="stat-card-top">
+                                <div class="stat-card-icon amber">
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                </div>
+                                <span class="stat-card-tag" style="background:rgba(245,158,11,0.15); color:#fbbf24;">Por Vencer</span>
+                            </div>
+                            <div class="stat-val" id="dash-alertas-total">0</div>
+                            <div class="stat-label">Cuentas y perfiles próximos</div>
+                        </div>
+                    </div>
+
+                    <!-- Distribución por Plataformas de Streaming -->
+                    <div style="margin: 28px 0 16px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                        <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; display:flex; align-items:center; gap:8px;">
+                            <span>Distribución por Servicio de Streaming</span>
+                        </h3>
+                        <button class="btn-action-secondary" style="padding: 6px 14px; font-size: 0.82rem;" onclick="App.switchView('plataformas')">
+                            ⚙️ Administrar Plataformas
+                        </button>
+                    </div>
+                    <div id="dash-plataformas-grid" class="stats-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
+                        <!-- Tarjetas por plataforma se renderizan aquí -->
+                    </div>
+
+                    <!-- Alertas Urgentes -->
+                    <div style="margin: 32px 0 16px; display:flex; align-items:center; justify-content:space-between;">
+                        <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff;">
+                            ⚡ Vencimientos Prioritarios (≤ 4 días)
+                        </h3>
+                        <a href="#" style="font-size:0.85rem; color:#818cf8; text-decoration:none; font-weight:700;" onclick="App.switchView('alertas')">Ver todas →</a>
+                    </div>
+                    <div id="dash-urgent-alerts" class="alerts-list">
+                        <!-- Alertas urgentes aquí -->
+                    </div>
+                </section>
+
+
+                <!-- ==============================================================
+                     SECCIÓN: 2. CUENTAS DE STREAMING
+                     ============================================================== -->
+                <section id="view-cuentas" class="view-section hidden">
+                    <div id="cuentas-list-container" class="accounts-grid">
+                        <!-- Tarjetas de cuentas renderizadas dinámicamente -->
+                    </div>
+                </section>
+
+
+                <!-- ==============================================================
+                     SECCIÓN: 3. PERFILES / PANTALLAS
+                     ============================================================== -->
+                <section id="view-perfiles" class="view-section hidden">
+                    <div class="table-card">
+                        <div class="table-responsive">
+                            <table class="modern-table">
+                                <thead>
+                                    <tr>
+                                        <th>Perfil / Plataforma</th>
+                                        <th>Cuenta Maestra / PIN</th>
+                                        <th>Cliente Asignado</th>
+                                        <th>Precio / Vence</th>
+                                        <th>Estado</th>
+                                        <th>Acciones Rápidas</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="perfiles-table-body">
+                                    <!-- Filas de perfiles -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+
+                <!-- ==============================================================
+                     SECCIÓN: 4. CLIENTES
+                     ============================================================== -->
+                <section id="view-clientes" class="view-section hidden">
+                    <div id="clientes-grid" class="clients-grid">
+                        <!-- Tarjetas de clientes -->
+                    </div>
+                </section>
+
+
+                <!-- ==============================================================
+                     SECCIÓN: 5. VENCIMIENTOS Y ALERTAS
+                     ============================================================== -->
+                <section id="view-alertas" class="view-section hidden">
+                    <div id="alertas-full-list" class="alerts-list">
+                        <!-- Lista completa de alertas -->
+                    </div>
+                </section>
+
+
+                <!-- ==============================================================
+                     SECCIÓN: 6. GESTIÓN DE PLATAFORMAS (CREAR / EDITAR / ELIMINAR)
+                     ============================================================== -->
+                <section id="view-plataformas" class="view-section hidden">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; flex-wrap: wrap; gap: 14px;">
+                        <div>
+                            <h3 style="color:#fff; font-size:1.25rem; font-weight:800;">Catálogo de Plataformas</h3>
+                            <p style="color:var(--text-muted); font-size:0.85rem;">Personaliza tus plataformas de streaming: agrega servicios, cambia colores de marca, pantallas y precios.</p>
+                        </div>
+                        <button class="btn-action-primary" id="btn-new-platform">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            <span>+ Nueva Plataforma</span>
+                        </button>
+                    </div>
+
+                    <div id="plataformas-catalog-grid" class="accounts-grid" style="grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));">
+                        <!-- Tarjetas de plataformas se renderizan con JS -->
+                    </div>
+                </section>
+
+                <!-- ==============================================================
+                     SECCIÓN: 7. CONFIGURACIÓN, USUARIOS, ROLES Y ACTUALIZADOR OTA
+                     ============================================================== -->
+                <section id="view-configuracion" class="view-section hidden">
+                    <div class="config-header-row">
+                        <div>
+                            <h3 class="config-main-title">Centro de Configuración y Control</h3>
+                            <p class="config-main-subtitle">Administra usuarios del equipo, define roles con permisos granulares y actualiza el sistema en línea vía GitHub.</p>
+                        </div>
+                    </div>
+
+                    <!-- Pestañas de Navegación de Configuración -->
+                    <div class="config-tabs-nav">
+                        <button type="button" class="config-tab-btn active" data-tab="usuarios">
+                            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                            <span>Usuarios (<span id="count-users-tab">0</span>)</span>
+                        </button>
+                        <button type="button" class="config-tab-btn" data-tab="roles">
+                            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            <span>Roles y Permisos (<span id="count-roles-tab">0</span>)</span>
+                        </button>
+                        <button type="button" class="config-tab-btn" data-tab="ajustes">
+                            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                            <span>Ajustes Generales</span>
+                        </button>
+                        <button type="button" class="config-tab-btn" data-tab="actualizaciones">
+                            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                            <span>Actualizador GitHub OTA</span>
+                            <span class="tab-badge-pulse" title="Sincronización Git disponible"></span>
+                        </button>
+                    </div>
+
+                    <!-- Panel 1: Usuarios -->
+                    <div id="config-panel-usuarios" class="config-tab-panel active">
+                        <div class="panel-action-bar">
+                            <div class="search-input-wrapper">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                <input type="text" id="search-users-input" placeholder="Buscar por nombre, correo o rol...">
+                            </div>
+                            <button type="button" class="btn-action-primary" id="btn-new-user">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                <span>+ Nuevo Usuario</span>
+                            </button>
+                        </div>
+                        <div id="users-cards-grid" class="users-grid">
+                            <!-- Tarjetas de usuarios dinámicas -->
+                        </div>
+                    </div>
+
+                    <!-- Panel 2: Roles y Permisos -->
+                    <div id="config-panel-roles" class="config-tab-panel hidden">
+                        <div class="panel-action-bar">
+                            <p class="panel-desc">Define qué puede ver, crear, editar y eliminar cada miembro de tu equipo según su cargo.</p>
+                            <button type="button" class="btn-action-primary" id="btn-new-role">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                <span>+ Nuevo Rol</span>
+                            </button>
+                        </div>
+                        <div id="roles-cards-grid" class="roles-grid">
+                            <!-- Tarjetas de roles dinámicas -->
+                        </div>
+                    </div>
+
+                    <!-- Panel 3: Ajustes Generales -->
+                    <div id="config-panel-ajustes" class="config-tab-panel hidden">
+                        <form id="form-system-settings" class="settings-form-card">
+                            <div class="settings-form-grid">
+                                <div class="form-group">
+                                    <label>Nombre de la Empresa o Negocio</label>
+                                    <div class="input-box">
+                                        <input type="text" id="cfg-empresa-nombre" placeholder="StreamManager Pro" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Teléfono de Soporte WhatsApp</label>
+                                    <div class="input-box">
+                                        <input type="text" id="cfg-empresa-telefono" placeholder="+51 987 654 321">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Moneda del Sistema</label>
+                                    <div class="input-box">
+                                        <select id="cfg-empresa-moneda">
+                                            <option value="USD">Dólares Estadounidenses (USD)</option>
+                                            <option value="PEN">Soles Peruanos (PEN)</option>
+                                            <option value="EUR">Euros (EUR)</option>
+                                            <option value="COP">Pesos Colombianos (COP)</option>
+                                            <option value="MXN">Pesos Mexicanos (MXN)</option>
+                                            <option value="ARS">Pesos Argentinos (ARS)</option>
+                                            <option value="CLP">Pesos Chilenos (CLP)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Símbolo de Moneda</label>
+                                    <div class="input-box">
+                                        <input type="text" id="cfg-empresa-simbolo" placeholder="$" maxlength="5" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Días Previos para Alerta de Vencimiento</label>
+                                    <div class="input-box">
+                                        <input type="number" id="cfg-dias-alerta" min="1" max="15" value="3" required>
+                                    </div>
+                                    <small style="color:var(--text-muted); font-size:0.75rem; margin-top:4px; display:block;">Las cuentas y perfiles entrarán en estado "Por Vencer" con esta antelación.</small>
+                                </div>
+                            </div>
+                            <div style="margin-top:24px; display:flex; justify-content:flex-end;">
+                                <button type="submit" class="btn-action-primary" id="btn-save-settings">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                    <span>Guardar Parámetros</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Panel 4: Actualizador GitHub OTA -->
+                    <div id="config-panel-actualizaciones" class="config-tab-panel hidden">
+                        <div class="ota-dashboard-card">
+                            <div class="ota-status-header">
+                                <div class="ota-brand-status">
+                                    <div class="ota-icon-glow">
+                                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="ota-title">Sincronización y Actualizaciones en la Nube (GitHub OTA)</h4>
+                                        <p class="ota-subtitle">Descarga e instala nuevas versiones automáticamente desde GitHub preservando 100% tus clientes, cuentas y base de datos.</p>
+                                    </div>
+                                </div>
+                                <div class="ota-version-badge">
+                                    <span>Versión Actual</span>
+                                    <strong id="ota-current-version-label">v2.7.0</strong>
+                                </div>
+                            </div>
+
+                            <!-- Repositorio Conectado -->
+                            <div class="ota-repo-config-card">
+                                <div class="form-row">
+                                    <div class="form-group" style="flex:2;">
+                                        <label>Repositorio GitHub (owner/repo)</label>
+                                        <div class="input-box">
+                                            <input type="text" id="cfg-github-repo" value="networkturbo4-pixel/streampro" placeholder="usuario/repositorio">
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="flex:1;">
+                                        <label>Rama Principal</label>
+                                        <div class="input-box">
+                                            <input type="text" id="cfg-github-branch" value="main" placeholder="main">
+                                        </div>
+                                    </div>
+                                    <div class="form-group" style="flex:1.5;">
+                                        <label>Token Personal GitHub (Opcional)</label>
+                                        <div class="input-box">
+                                            <input type="password" id="cfg-github-token" placeholder="ghp_xxxxxxxxxxxx" title="Opcional: aumenta límites de consulta a la API de GitHub">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Acciones de Comprobación y Actualización -->
+                            <div class="ota-actions-row">
+                                <button type="button" class="btn-action-secondary" id="btn-check-github">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                                    <span>Comprobar Actualizaciones</span>
+                                </button>
+                                <button type="button" class="btn-action-primary" id="btn-apply-github">
+                                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    <span>Instalar y Aplicar Actualización</span>
+                                </button>
+                            </div>
+
+                            <!-- Caja de Estado de Actualización -->
+                            <div id="ota-status-box" class="ota-info-box" style="display:none;">
+                                <div id="ota-status-content">
+                                    <!-- Información del commit y versión detectada -->
+                                </div>
+                            </div>
+
+                            <!-- Consola / Terminal de Actualización en Vivo -->
+                            <div class="ota-console-wrapper">
+                                <div class="ota-console-header">
+                                    <div class="ota-console-dots">
+                                        <span class="dot red"></span>
+                                        <span class="dot yellow"></span>
+                                        <span class="dot green"></span>
+                                    </div>
+                                    <span class="ota-console-title">Registro de Actualización en Tiempo Real</span>
+                                    <button type="button" class="btn-clear-console" id="btn-clear-ota-logs" title="Limpiar terminal">Limpiar</button>
+                                </div>
+                                <div class="ota-console-body" id="ota-console-logs">
+                                    <div class="log-line text-muted">[Listo] Presiona "Comprobar Actualizaciones" o "Instalar Actualización" para iniciar.</div>
+                                    <div class="log-line text-muted">[Seguridad] Las tablas de base de datos se actualizan automáticamente mediante migraciones incrementales sin borrar clientes ni cuentas.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+
+        <!-- Navegación Inferior Móvil (Thumb-friendly Mobile Bar) -->
+        <nav class="mobile-bottom-nav">
+            <a href="#" class="mobile-nav-item active" data-view="dashboard">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <span>Inicio</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-view="cuentas">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+                <span>Cuentas</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-view="perfiles">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                <span>Perfiles</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-view="clientes">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                <span>Clientes</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-view="plataformas">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                <span>Plataf.</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-view="alertas">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <span>Alertas</span>
+                <span class="mobile-badge alert-badge-count" style="display:none;">0</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-view="configuracion">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                <span>Ajustes</span>
+            </a>
+        </nav>
+    </div>
+
+
+    <!-- =====================================================================
+         MODAL 1: REGISTRAR / EDITAR CUENTA
+         ===================================================================== -->
+    <div id="modal-cuenta" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modal-cuenta-title">Registrar Nueva Cuenta</h3>
+                <button class="btn-close-modal" title="Cerrar">&times;</button>
+            </div>
+            <form id="form-cuenta">
+                <div class="modal-body">
+                    <input type="hidden" id="cuenta-id">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Plataforma *</label>
+                            <div class="input-box">
+                                <select id="cuenta-plataforma" required></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Modalidad de Venta *</label>
+                            <div class="input-box">
+                                <select id="cuenta-tipo">
+                                    <option value="por_perfil">Por Perfiles (Pantallas)</option>
+                                    <option value="cuenta_completa">Cuenta Completa</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Si es cuenta completa, asignar a un cliente directamente -->
+                    <div class="form-group" id="group-cliente-cuenta" style="display:none;">
+                        <label>Cliente Asignado (Cuenta Completa)</label>
+                        <div class="input-box">
+                            <select id="cuenta-cliente"></select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Usuario o Correo de Acceso *</label>
+                            <div class="input-box">
+                                <input type="text" id="cuenta-correo" placeholder="Usuario o correo (ej: romacomercial22 o user@stream.com)" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Contraseña *</label>
+                            <div class="input-box">
+                                <input type="text" id="cuenta-password" placeholder="PassSeguro$2026" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>PIN Maestro / Control Parental</label>
+                            <div class="input-box">
+                                <input type="text" id="cuenta-pin" placeholder="Ej: 1234">
+                            </div>
+                        </div>
+                        <div class="form-group" id="group-max-perfiles">
+                            <label>Cantidad de Perfiles (Slots)</label>
+                            <div class="input-box">
+                                <input type="number" id="cuenta-max-perfiles" value="5" min="1" max="10">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Costo de Compra (S/)</label>
+                            <div class="input-box">
+                                <input type="number" id="cuenta-costo" step="0.50" value="25.00">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Precio Venta Total / Sugerido (S/)</label>
+                            <div class="input-box">
+                                <input type="number" id="cuenta-precio" step="0.50" value="50.00">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fecha de Inicio *</label>
+                            <div class="input-box">
+                                <input type="date" id="cuenta-fecha-inicio" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha de Vencimiento *</label>
+                            <div class="input-box">
+                                <input type="date" id="cuenta-fecha-venc" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Proveedor / Origen de la cuenta</label>
+                        <div class="input-box">
+                            <input type="text" id="cuenta-proveedor" placeholder="Ej: Mayorista Digital / Web Oficial">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Notas / Reglas Internas</label>
+                        <div class="input-box">
+                            <textarea id="cuenta-notas" rows="2" placeholder="Notas sobre el método, renovación, etc."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-action-secondary btn-close-modal">Cancelar</button>
+                    <button type="submit" class="btn-action-primary">Guardar Cuenta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- =====================================================================
+         MODAL 2: ASIGNAR PERFIL A CLIENTE
+         ===================================================================== -->
+    <div id="modal-asignar-perfil" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Asignar Perfil a Cliente</h3>
+                <button class="btn-close-modal" title="Cerrar">&times;</button>
+            </div>
+            <form id="form-asignar-perfil">
+                <div class="modal-body">
+                    <input type="hidden" id="assign-perfil-id">
+
+                    <!-- Resumen Informativo de la Cuenta Maestra -->
+                    <div id="assign-account-info-box" class="modal-account-summary">
+                        <!-- Se llena dinámicamente con App.js -->
+                    </div>
+
+                    <div class="form-group">
+                        <label>Cliente Asignado *</label>
+                        <div class="input-box">
+                            <select id="assign-cliente-id" required></select>
+                        </div>
+                    </div>
+
+                    <!-- Campos rápidos si selecciona "Crear nuevo cliente" -->
+                    <div id="new-client-quick-fields" class="form-row" style="display:none; background: rgba(99,102,241,0.08); padding: 12px; border-radius: var(--radius-sm); border: 1px dashed rgba(99,102,241,0.3); margin-bottom: 16px;">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Nombre Completo</label>
+                            <div class="input-box">
+                                <input type="text" id="new-cli-nombre" placeholder="Ej: Juan Pérez">
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label>Teléfono (WhatsApp)</label>
+                            <div class="input-box">
+                                <input type="text" id="new-cli-telefono" placeholder="Ej: +51987654321">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nombre del Perfil *</label>
+                            <div class="input-box">
+                                <input type="text" id="assign-perfil-nombre" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>PIN de Pantalla / Perfil</label>
+                            <div class="input-box">
+                                <input type="text" id="assign-perfil-pin" placeholder="Ej: 1234">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Selector Visual de Tipo de Dispositivo (Cards Seleccionables) -->
+                    <div class="form-group">
+                        <label>Dispositivo donde verá el Cliente *</label>
+                        <input type="hidden" id="assign-dispositivo" value="tv">
+                        <div class="device-cards-grid">
+                            <div class="device-card active" data-device="tv" onclick="App.selectDeviceType('tv')">
+                                <div class="device-card-icon">
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+                                </div>
+                                <div class="device-card-info">
+                                    <div class="device-card-title">Smart TV</div>
+                                    <div class="device-card-sub">TV Box / Roku / Firestick</div>
+                                </div>
+                                <div class="device-card-check">
+                                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                </div>
+                            </div>
+
+                            <div class="device-card" data-device="android" onclick="App.selectDeviceType('android')">
+                                <div class="device-card-icon">
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                                </div>
+                                <div class="device-card-info">
+                                    <div class="device-card-title">Android</div>
+                                    <div class="device-card-sub">Celular / Tablet</div>
+                                </div>
+                                <div class="device-card-check">
+                                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                </div>
+                            </div>
+
+                            <div class="device-card" data-device="iphone" onclick="App.selectDeviceType('iphone')">
+                                <div class="device-card-icon">
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="4" ry="4"/><circle cx="12" cy="18" r="1"/></svg>
+                                </div>
+                                <div class="device-card-info">
+                                    <div class="device-card-title">iPhone / iPad</div>
+                                    <div class="device-card-sub">iOS / Apple TV</div>
+                                </div>
+                                <div class="device-card-check">
+                                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                </div>
+                            </div>
+
+                            <div class="device-card" data-device="pc" onclick="App.selectDeviceType('pc')">
+                                <div class="device-card-icon">
+                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                                </div>
+                                <div class="device-card-info">
+                                    <div class="device-card-title">PC / Laptop</div>
+                                    <div class="device-card-sub">Windows / Mac / Web</div>
+                                </div>
+                                <div class="device-card-check">
+                                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Dirección MAC o IP (Identificador)</label>
+                            <div class="input-box">
+                                <input type="text" id="assign-ip-mac" placeholder="Ej: 00:1A:79:B4:2C:11 o 190.235.12.4">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Precio Mensual (S/) *</label>
+                            <div class="input-box">
+                                <input type="number" id="assign-precio" step="0.50" value="12.00" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Notas / Ubicación del Dispositivo</label>
+                        <div class="input-box">
+                            <input type="text" id="assign-notas" placeholder="Ej: Smart TV Sala, TV Box living, Celular personal...">
+                        </div>
+                    </div>
+
+                    <!-- Fechas de Ingreso y Vencimiento -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Fecha de Ingreso (Inicio Cliente) *</label>
+                            <div class="input-box">
+                                <input type="date" id="assign-fecha-inicio" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha de Vencimiento (Cliente) *</label>
+                            <div class="input-box">
+                                <input type="date" id="assign-fecha-venc" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Duración Rápida -->
+                    <div class="quick-duration-chips">
+                        <span class="quick-chip-label">Duración rápida:</span>
+                        <button type="button" class="btn-chip" onclick="App.setAssignDuration(30)">+30 días (1 mes)</button>
+                        <button type="button" class="btn-chip" onclick="App.setAssignDuration(60)">+60 días (2 meses)</button>
+                        <button type="button" class="btn-chip chip-highlight" id="btn-chip-account-due" onclick="App.setAssignDurationToAccountDue()">Hasta vencer cuenta</button>
+                    </div>
+
+                    <!-- Alerta de Conflicto de Vencimiento en Tiempo Real -->
+                    <div id="assign-conflict-warning" class="conflict-alert-box" style="display:none;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-action-secondary btn-close-modal">Cancelar</button>
+                    <button type="submit" class="btn-action-primary">Asignar Perfil</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- =====================================================================
+         MODAL 3: REGISTRAR / EDITAR CLIENTE
+         ===================================================================== -->
+    <div id="modal-cliente" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modal-cliente-title">Registrar Nuevo Cliente</h3>
+                <button class="btn-close-modal" title="Cerrar">&times;</button>
+            </div>
+            <form id="form-cliente">
+                <div class="modal-body">
+                    <input type="hidden" id="cliente-id">
+
+                    <div class="form-group">
+                        <label>Nombre y Apellidos *</label>
+                        <div class="input-box">
+                            <input type="text" id="cliente-nombre" placeholder="Carlos Mendoza" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Teléfono (WhatsApp con código de país) *</label>
+                        <div class="input-box">
+                            <input type="text" id="cliente-telefono" placeholder="+51987654321" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Correo Electrónico (Opcional)</label>
+                        <div class="input-box">
+                            <input type="email" id="cliente-email" placeholder="cliente@gmail.com">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Notas / Preferencias</label>
+                        <div class="input-box">
+                            <textarea id="cliente-notas" rows="2" placeholder="Paga puntual, pide recordatorio 2 días antes, etc."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-action-secondary btn-close-modal">Cancelar</button>
+                    <button type="submit" class="btn-action-primary">Guardar Cliente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- =====================================================================
+         MODAL 4: REGISTRAR / EDITAR PLATAFORMA DE STREAMING
+         ===================================================================== -->
+    <div id="modal-plataforma" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modal-plataforma-title">Registrar Nueva Plataforma</h3>
+                <button class="btn-close-modal" title="Cerrar">&times;</button>
+            </div>
+            <form id="form-plataforma">
+                <div class="modal-body">
+                    <input type="hidden" id="plataforma-id">
+
+                    <div class="form-group">
+                        <label>Nombre de la Plataforma *</label>
+                        <div class="input-box">
+                            <input type="text" id="plataforma-nombre" placeholder="Ej: Crunchyroll Mega Fan, Tidal, IPTV, etc." required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Color de Marca (Hex) *</label>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <input type="color" id="plataforma-color-picker" value="#6366f1" style="width:48px; height:46px; border:1px solid var(--border-color); border-radius:var(--radius-sm); cursor:pointer; background:transparent;">
+                                <div class="input-box" style="flex:1;">
+                                    <input type="text" id="plataforma-color" value="#6366f1" placeholder="#6366f1" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Perfiles Máx. por Defecto *</label>
+                            <div class="input-box">
+                                <input type="number" id="plataforma-max-perfiles" value="5" min="1" max="15" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Precio Sugerido por Perfil (S/)</label>
+                        <div class="input-box">
+                            <input type="number" id="plataforma-precio" step="0.50" value="10.00" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-action-secondary btn-close-modal">Cancelar</button>
+                    <button type="submit" class="btn-action-primary">Guardar Plataforma</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- =====================================================================
+         MODAL 5: REGISTRAR / EDITAR USUARIO DEL SISTEMA
+         ===================================================================== -->
+    <div id="modal-usuario" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3 id="modal-usuario-title">Registrar Nuevo Usuario</h3>
+                <button type="button" class="btn-close-modal" title="Cerrar">&times;</button>
+            </div>
+            <form id="form-usuario">
+                <div class="modal-body">
+                    <input type="hidden" id="usuario-id">
+
+                    <div class="form-group">
+                        <label>Nombre Completo *</label>
+                        <div class="input-box">
+                            <input type="text" id="usuario-nombre" placeholder="Ej: Roberto Sánchez" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Correo Electrónico (Login) *</label>
+                            <div class="input-box">
+                                <input type="email" id="usuario-email" placeholder="usuario@stream.app" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono WhatsApp</label>
+                            <div class="input-box">
+                                <input type="text" id="usuario-telefono" placeholder="+51 987 654 321">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label id="label-usuario-password">Contraseña *</label>
+                        <div class="input-box">
+                            <input type="password" id="usuario-password" placeholder="••••••••••••">
+                        </div>
+                        <small id="hint-usuario-password" style="color:var(--text-muted); font-size:0.75rem; margin-top:4px; display:block;">Para usuarios nuevos la contraseña es obligatoria.</small>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Rol de Acceso y Permisos *</label>
+                            <div class="input-box">
+                                <select id="usuario-rol-id" required>
+                                    <!-- Opciones de roles dinámicas -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Estado de Cuenta *</label>
+                            <div class="input-box">
+                                <select id="usuario-estado" required>
+                                    <option value="activo">Activo (Puede acceder)</option>
+                                    <option value="inactivo">Inactivo (Acceso bloqueado)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-action-secondary btn-close-modal">Cancelar</button>
+                    <button type="submit" class="btn-action-primary">Guardar Usuario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- =====================================================================
+         MODAL 6: REGISTRAR / EDITAR ROL Y PERMISOS MODULARES
+         ===================================================================== -->
+    <div id="modal-rol" class="modal-overlay">
+        <div class="modal-container" style="max-width: 650px;">
+            <div class="modal-header">
+                <h3 id="modal-rol-title">Registrar Nuevo Rol</h3>
+                <button type="button" class="btn-close-modal" title="Cerrar">&times;</button>
+            </div>
+            <form id="form-rol">
+                <div class="modal-body">
+                    <input type="hidden" id="rol-id">
+
+                    <div class="form-group">
+                        <label>Nombre del Rol *</label>
+                        <div class="input-box">
+                            <input type="text" id="rol-nombre" placeholder="Ej: Gestor de Clientes, Auditor, etc." required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Descripción de Funciones</label>
+                        <div class="input-box">
+                            <input type="text" id="rol-descripcion" placeholder="Breve resumen de responsabilidades asignadas">
+                        </div>
+                    </div>
+
+                    <!-- Matriz de Permisos por Módulo -->
+                    <div class="permissions-matrix-wrapper">
+                        <div class="matrix-header">
+                            <div>
+                                <h4 style="font-size:0.92rem; font-weight:700; color:#fff;">Matriz de Permisos por Módulo</h4>
+                                <p style="font-size:0.75rem; color:var(--text-muted);">Activa o desactiva qué puede realizar este rol en cada sección.</p>
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <button type="button" class="btn-micro" id="btn-perm-check-all">Marcar Todos</button>
+                                <button type="button" class="btn-micro" id="btn-perm-uncheck-all">Desmarcar</button>
+                            </div>
+                        </div>
+
+                        <div class="permissions-matrix-table">
+                            <!-- Dashboard -->
+                            <div class="perm-row">
+                                <div class="perm-module-info">
+                                    <strong>Dashboard</strong>
+                                    <span>Métricas y resumen general</span>
+                                </div>
+                                <div class="perm-actions-group">
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[dashboard][ver]" value="1" checked> <span>Ver</span></label>
+                                </div>
+                            </div>
+
+                            <!-- Cuentas -->
+                            <div class="perm-row">
+                                <div class="perm-module-info">
+                                    <strong>Cuentas</strong>
+                                    <span>Gestión de credenciales de streaming</span>
+                                </div>
+                                <div class="perm-actions-group">
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[cuentas][ver]" value="1"> <span>Ver</span></label>
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[cuentas][crear]" value="1"> <span>Crear</span></label>
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[cuentas][editar]" value="1"> <span>Editar</span></label>
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[cuentas][eliminar]" value="1"> <span>Eliminar</span></label>
+                                </div>
+                            </div>
+
+                            <!-- Perfiles -->
+                            <div class="perm-row">
+                                <div class="perm-module-info">
+                                    <strong>Perfiles / Pantallas</strong>
+                                    <span>Venta y asignación individual</span>
+                                </div>
+                                <div class="perm-actions-group">
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[perfiles][ver]" value="1"> <span>Ver</span></label>
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[perfiles][crear]" value="1"> <span>Crear</span></label>
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[perfiles][editar]" value="1"> <span>Editar</span></label>
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[perfiles][eliminar]" value="1"> <span>Eliminar</span></label>
+                                </div>
+                            </div>
+
+                            <!-- Clientes -->
+                            <div class="perm-row">
+                                <div class="perm-module-info">
+                                    <strong>Clientes</strong>
+                                    <span>Directorio de compradores</span>
+                                </div>
+                                <div class="perm-actions-group">
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[clientes][ver]" value="1"> <span>Ver</span></label>
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[clientes][crear]" value="1"> <span>Crear</span></label>
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[clientes][editar]" value="1"> <span>Editar</span></label>
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[clientes][eliminar]" value="1"> <span>Eliminar</span></label>
+                                </div>
+                            </div>
+
+                            <!-- Plataformas -->
+                            <div class="perm-row">
+                                <div class="perm-module-info">
+                                    <strong>Plataformas</strong>
+                                    <span>Catálogo de servicios y precios</span>
+                                </div>
+                                <div class="perm-actions-group">
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[plataformas][ver]" value="1"> <span>Ver</span></label>
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[plataformas][crear]" value="1"> <span>Crear</span></label>
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[plataformas][editar]" value="1"> <span>Editar</span></label>
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[plataformas][eliminar]" value="1"> <span>Eliminar</span></label>
+                                </div>
+                            </div>
+
+                            <!-- Vencimientos / Alertas -->
+                            <div class="perm-row">
+                                <div class="perm-module-info">
+                                    <strong>Vencimientos / Alertas</strong>
+                                    <span>Notificaciones y cobros por vencer</span>
+                                </div>
+                                <div class="perm-actions-group">
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[alertas][ver]" value="1"> <span>Ver</span></label>
+                                </div>
+                            </div>
+
+                            <!-- Configuración -->
+                            <div class="perm-row">
+                                <div class="perm-module-info">
+                                    <strong>Configuración del Sistema</strong>
+                                    <span>Usuarios, roles, ajustes y GitHub</span>
+                                </div>
+                                <div class="perm-actions-group">
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[configuracion][ver]" value="1"> <span>Ver Módulo</span></label>
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[configuracion][usuarios]" value="1"> <span>Usuarios</span></label>
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[configuracion][roles]" value="1"> <span>Roles</span></label>
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[configuracion][ajustes]" value="1"> <span>Ajustes</span></label>
+                                    <label class="perm-toggle"><input type="checkbox" name="perm[configuracion][actualizaciones]" value="1"> <span>Actualizar</span></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-action-secondary btn-close-modal">Cancelar</button>
+                    <button type="submit" class="btn-action-primary">Guardar Rol</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts del Sistema -->
+    <script src="assets/js/api.js?v=2.7.0"></script>
+    <script src="assets/js/auth.js?v=2.7.0"></script>
+    <script src="assets/js/app.js?v=2.7.0"></script>
+    <script src="assets/js/pwa.js?v=1.0.1"></script>
+</body>
+</html>
