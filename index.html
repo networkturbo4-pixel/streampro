@@ -6,13 +6,14 @@
     <meta name="description" content="Sistema profesional e inteligente de administración de cuentas, perfiles y clientes de streaming.">
     
     <!-- PWA Meta Tags & Colors -->
-    <meta name="theme-color" content="#080c14">
+    <meta name="color-scheme" content="dark light">
+    <meta name="theme-color" content="#07090e">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="StreamPRO">
     <meta name="application-name" content="StreamManager Pro">
-    <meta name="msapplication-TileColor" content="#080c14">
+    <meta name="msapplication-TileColor" content="#07090e">
     <meta name="msapplication-TileImage" content="assets/icons/icon-144x144.png">
 
     <!-- PWA Web App Manifest -->
@@ -24,15 +25,15 @@
     <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192x192.png">
     <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
 
-    <title>StreamManager Pro - Sistema de Administración de Cuentas Streaming</title>
+    <title>StreamManager Pro — Enterprise SaaS Streaming Hub</title>
 
-    <!-- Google Fonts: Plus Jakarta Sans -->
+    <!-- Google Fonts: Inter, Plus Jakarta Sans & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 
     <!-- CSS del Sistema -->
-    <link rel="stylesheet" href="assets/css/style.css?v=2.8.2">
+    <link rel="stylesheet" href="assets/css/style.css?v=3.0.0">
 </head>
 <body>
 
@@ -191,20 +192,26 @@
          ===================================================================== -->
     <div id="view-app" class="app-layout hidden">
 
-        <!-- Sidebar Desktop -->
+        <!-- Sidebar Desktop (Enterprise SaaS Navigation) -->
         <aside class="app-sidebar">
             <div class="sidebar-header">
                 <div class="sidebar-brand-icon">
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                 </div>
-                <div class="sidebar-brand-name">Stream<span>PRO</span></div>
+                <div class="sidebar-brand-group">
+                    <div class="sidebar-brand-name">Stream<span>PRO</span></div>
+                    <span class="sidebar-brand-tag">ENTERPRISE CLOUD</span>
+                </div>
             </div>
 
             <nav class="sidebar-nav">
+                <div class="sidebar-nav-section">RESUMEN</div>
                 <a href="#" class="nav-item active" data-view="dashboard">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
                     <span>Dashboard</span>
                 </a>
+
+                <div class="sidebar-nav-section">OPERACIONES</div>
                 <a href="#" class="nav-item" data-view="cuentas">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
                     <span>Cuentas</span>
@@ -226,6 +233,8 @@
                     <span>Vencimientos</span>
                     <span class="nav-badge alert-badge-count" style="display:none;">0</span>
                 </a>
+
+                <div class="sidebar-nav-section">SISTEMA</div>
                 <a href="#" class="nav-item" data-view="configuracion">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"></circle>
@@ -243,7 +252,7 @@
                     </div>
                     <div>
                         <div class="sidebar-install-title">StreamPRO App</div>
-                        <div class="sidebar-install-desc">Instalar en tu dispositivo</div>
+                        <div class="sidebar-install-desc">Acceso directo nativo</div>
                     </div>
                 </div>
                 <button type="button" class="btn-sidebar-install btn-pwa-install">
@@ -254,11 +263,14 @@
 
             <div class="sidebar-footer">
                 <div class="user-snippet">
-                    <div class="user-avatar">A</div>
+                    <div class="user-avatar-wrapper">
+                        <div class="user-avatar">A</div>
+                        <span class="user-online-dot" title="Sesión activa"></span>
+                    </div>
                     <div class="user-info">
                         <div class="name current-user-name truncate">Admin</div>
                         <div class="role current-user-email truncate">admin@stream.app</div>
-                        <div class="current-user-role truncate" style="font-size: 0.7rem; color: #818cf8; font-weight: 700; margin-top: 1px;">Super Administrador</div>
+                        <div class="current-user-role truncate">Super Administrador</div>
                     </div>
                 </div>
                 <button class="btn-icon-logout btn-logout" title="Cerrar Sesión">
@@ -279,23 +291,36 @@
                         <div class="mobile-brand-name">Stream<span>PRO</span></div>
                     </div>
                     <div class="page-title-box">
-                        <h2 id="top-page-title">Resumen General</h2>
-                        <p id="top-page-subtitle">StreamManager Cloud v2.7.0</p>
+                        <div class="page-title-row">
+                            <span class="page-breadcrumb">Workspace</span>
+                            <span class="page-breadcrumb-sep">/</span>
+                            <h2 id="top-page-title">Resumen General</h2>
+                        </div>
+                        <div class="page-subtitle-row">
+                            <span class="system-live-dot"></span>
+                            <p id="top-page-subtitle">StreamManager Cloud v2.7.0</p>
+                        </div>
                     </div>
                 </div>
 
                 <div class="top-actions">
+                    <!-- Conmutador de Tema (Oscuro / Claro SaaS) -->
+                    <button type="button" class="btn-theme-toggle" id="btn-theme-toggle" title="Cambiar apariencia (Modo Oscuro / Claro)" aria-label="Cambiar tema">
+                        <svg class="icon-sun" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                        <svg class="icon-moon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                    </button>
+
                     <!-- Botón Instalar App PWA -->
                     <button type="button" class="btn-nav-install pwa-install-trigger btn-pwa-install" style="display:none;" title="Instalar Aplicación en este Dispositivo">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         <span>Instalar App</span>
                     </button>
                     <button class="btn-action-secondary" id="btn-new-client">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
                         <span>+ Cliente</span>
                     </button>
                     <button class="btn-action-primary" id="btn-new-account">
-                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                         <span>+ Nueva Cuenta</span>
                     </button>
                     <button class="btn-icon-logout btn-logout mobile-logout" title="Cerrar Sesión" style="display:none;">
@@ -310,7 +335,8 @@
                 <div class="toolbar-bar">
                     <div class="search-input-wrapper">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                        <input type="text" id="global-search" placeholder="Buscar por correo, cliente, perfil, WhatsApp...">
+                        <input type="search" id="global-search" name="global_search_filter" autocomplete="off" spellcheck="false" placeholder="Buscar por correo, cliente, perfil, PIN o WhatsApp...">
+                        <kbd class="search-kbd" title="Presiona / para buscar">/</kbd>
                     </div>
                     <div class="filter-group">
                         <select id="filter-status" class="filter-select">
@@ -334,15 +360,15 @@
                      SECCIÓN: 1. DASHBOARD
                      ============================================================== -->
                 <section id="view-dashboard" class="view-section">
-                    <!-- 4 Tarjetas de Estadísticas Principales -->
+                    <!-- 4 Tarjetas de Estadísticas Principales (Bento KPI Grid) -->
                     <div class="stats-grid">
                         <!-- Stat: Cuentas -->
                         <div class="stat-card">
                             <div class="stat-card-top">
                                 <div class="stat-card-icon blue">
-                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
                                 </div>
-                                <span class="stat-card-tag" style="background:rgba(59,130,246,0.15); color:#60a5fa;">Cuentas</span>
+                                <span class="stat-card-tag tag-blue">Suscripciones</span>
                             </div>
                             <div class="stat-val" id="dash-cuentas-total">0</div>
                             <div class="stat-label" id="dash-cuentas-sub">0 activas</div>
@@ -352,14 +378,14 @@
                         <div class="stat-card">
                             <div class="stat-card-top">
                                 <div class="stat-card-icon purple">
-                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                                 </div>
-                                <span class="stat-card-tag" style="background:rgba(168,85,247,0.15); color:#c084fc;">Pantallas</span>
+                                <span class="stat-card-tag tag-purple">Ocupación</span>
                             </div>
                             <div class="stat-val" id="dash-perfiles-total">0 / 0</div>
                             <div class="stat-label" id="dash-perfiles-sub">0 libres para venta</div>
                             <div class="stat-progress">
-                                <div id="dash-perfiles-bar" class="stat-progress-bar" style="width: 0%; background: #a855f7;"></div>
+                                <div id="dash-perfiles-bar" class="stat-progress-bar" style="width: 0%;"></div>
                             </div>
                         </div>
 
@@ -367,9 +393,9 @@
                         <div class="stat-card">
                             <div class="stat-card-top">
                                 <div class="stat-card-icon green">
-                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                                 </div>
-                                <span class="stat-card-tag" style="background:rgba(16,185,129,0.15); color:#34d399;">Ganancia Mes</span>
+                                <span class="stat-card-tag tag-green">Rentabilidad</span>
                             </div>
                             <div class="stat-val" id="dash-ganancia-total">S/ 0.00</div>
                             <div class="stat-label" id="dash-finanzas-sub">Ingresos estimados</div>
@@ -379,9 +405,9 @@
                         <div class="stat-card">
                             <div class="stat-card-top">
                                 <div class="stat-card-icon amber">
-                                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
                                 </div>
-                                <span class="stat-card-tag" style="background:rgba(245,158,11,0.15); color:#fbbf24;">Por Vencer</span>
+                                <span class="stat-card-tag tag-amber">Atención</span>
                             </div>
                             <div class="stat-val" id="dash-alertas-total">0</div>
                             <div class="stat-label">Cuentas y perfiles próximos</div>
@@ -389,24 +415,30 @@
                     </div>
 
                     <!-- Distribución por Plataformas de Streaming -->
-                    <div style="margin: 28px 0 16px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-                        <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; display:flex; align-items:center; gap:8px;">
-                            <span>Distribución por Servicio de Streaming</span>
-                        </h3>
-                        <button class="btn-action-secondary" style="padding: 6px 14px; font-size: 0.82rem;" onclick="App.switchView('plataformas')">
-                            ⚙️ Administrar Plataformas
+                    <div class="section-header-bar">
+                        <div class="section-header-left">
+                            <span class="section-header-dot"></span>
+                            <h3>Distribución por Servicio de Streaming</h3>
+                        </div>
+                        <button class="btn-action-secondary btn-sm" onclick="App.switchView('plataformas')">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                            <span>Administrar Plataformas</span>
                         </button>
                     </div>
-                    <div id="dash-plataformas-grid" class="stats-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
+                    <div id="dash-plataformas-grid" class="stats-grid platforms-bento-grid">
                         <!-- Tarjetas por plataforma se renderizan aquí -->
                     </div>
 
                     <!-- Alertas Urgentes -->
-                    <div style="margin: 32px 0 16px; display:flex; align-items:center; justify-content:space-between;">
-                        <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff;">
-                            ⚡ Vencimientos Prioritarios (≤ 4 días)
-                        </h3>
-                        <a href="#" style="font-size:0.85rem; color:#818cf8; text-decoration:none; font-weight:700;" onclick="App.switchView('alertas')">Ver todas →</a>
+                    <div class="section-header-bar" style="margin-top: 32px;">
+                        <div class="section-header-left">
+                            <span class="section-header-dot warning"></span>
+                            <h3>Vencimientos Prioritarios (≤ 4 días)</h3>
+                        </div>
+                        <a href="#" class="section-link-more" onclick="App.switchView('alertas')">
+                            <span>Ver todas las alertas</span>
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </a>
                     </div>
                     <div id="dash-urgent-alerts" class="alerts-list">
                         <!-- Alertas urgentes aquí -->
@@ -505,10 +537,11 @@
                      SECCIÓN: 6. GESTIÓN DE PLATAFORMAS (CREAR / EDITAR / ELIMINAR)
                      ============================================================== -->
                 <section id="view-plataformas" class="view-section hidden">
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; flex-wrap: wrap; gap: 14px;">
-                        <div>
-                            <h3 style="color:#fff; font-size:1.25rem; font-weight:800;">Catálogo de Plataformas</h3>
-                            <p style="color:var(--text-muted); font-size:0.85rem;">Personaliza tus plataformas de streaming: agrega servicios, cambia colores de marca, pantallas y precios.</p>
+                    <div class="config-hero-banner">
+                        <div class="config-hero-text">
+                            <span class="config-hero-kicker">CATÁLOGO DE SERVICIOS</span>
+                            <h3 class="config-main-title">Plataformas de Streaming</h3>
+                            <p class="config-main-subtitle">Personaliza tus servicios activos: colores corporativos, cupo de pantallas por cuenta y precios sugeridos.</p>
                         </div>
                         <button class="btn-action-primary" id="btn-new-platform">
                             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -525,40 +558,59 @@
                      SECCIÓN: 7. CONFIGURACIÓN, USUARIOS, ROLES Y ACTUALIZADOR OTA
                      ============================================================== -->
                 <section id="view-configuracion" class="view-section hidden">
-                    <div class="config-header-row">
-                        <div>
+                    <!-- Cabecera SaaS Enterprise de Configuración -->
+                    <div class="config-hero-banner">
+                        <div class="config-hero-text">
+                            <span class="config-hero-kicker">ADMINISTRACIÓN Y SEGURIDAD</span>
                             <h3 class="config-main-title">Centro de Configuración y Control</h3>
                             <p class="config-main-subtitle">Administra usuarios del equipo, define roles con permisos granulares y actualiza el sistema en línea vía GitHub.</p>
                         </div>
+                        <div class="config-hero-metrics">
+                            <div class="config-metric-pill">
+                                <span class="metric-label">Control de Acceso</span>
+                                <strong class="metric-val">RBAC Activo</strong>
+                            </div>
+                            <div class="config-metric-pill">
+                                <span class="metric-label">Motor OTA</span>
+                                <strong class="metric-val text-emerald">GitHub Sync</strong>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Pestañas de Navegación de Configuración -->
-                    <div class="config-tabs-nav">
-                        <button type="button" class="config-tab-btn active" data-tab="usuarios">
-                            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                            <span>Usuarios (<span id="count-users-tab">0</span>)</span>
-                        </button>
-                        <button type="button" class="config-tab-btn" data-tab="roles">
-                            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                            <span>Roles y Permisos (<span id="count-roles-tab">0</span>)</span>
-                        </button>
-                        <button type="button" class="config-tab-btn" data-tab="ajustes">
-                            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                            <span>Ajustes Generales</span>
-                        </button>
-                        <button type="button" class="config-tab-btn" data-tab="actualizaciones">
-                            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-                            <span>Actualizador GitHub OTA</span>
-                            <span class="tab-badge-pulse" title="Sincronización Git disponible"></span>
-                        </button>
+                    <!-- Pestañas de Navegación de Configuración (Segmented Control) -->
+                    <div class="config-tabs-wrapper">
+                        <div class="config-tabs-nav" role="tablist">
+                            <button type="button" class="config-tab-btn active" data-tab="usuarios">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                <span>Usuarios</span>
+                                <span class="tab-counter-pill" id="count-users-tab">0</span>
+                            </button>
+                            <button type="button" class="config-tab-btn" data-tab="roles">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                                <span>Roles y Permisos</span>
+                                <span class="tab-counter-pill" id="count-roles-tab">0</span>
+                            </button>
+                            <button type="button" class="config-tab-btn" data-tab="ajustes">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                                <span>Ajustes Generales</span>
+                            </button>
+                            <button type="button" class="config-tab-btn" data-tab="actualizaciones">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                                <span>Actualizador GitHub OTA</span>
+                                <span class="tab-badge-pulse" title="Sincronización Git disponible"></span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Panel 1: Usuarios -->
                     <div id="config-panel-usuarios" class="config-tab-panel active">
                         <div class="panel-action-bar">
-                            <div class="search-input-wrapper">
+                            <div class="search-input-wrapper config-search-box">
                                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                                <input type="text" id="search-users-input" placeholder="Buscar por nombre, correo o rol...">
+                                <!-- Campos señuelo ocultos para evitar que el gestor de contraseñas del navegador autorrellene el buscador -->
+                                <input type="text" name="prevent_autofill_user" autocomplete="username" tabindex="-1" aria-hidden="true" style="position:absolute; opacity:0; pointer-events:none; width:0; height:0;">
+                                <input type="password" name="prevent_autofill_pass" autocomplete="current-password" tabindex="-1" aria-hidden="true" style="position:absolute; opacity:0; pointer-events:none; width:0; height:0;">
+                                <input type="search" id="search-users-input" name="user_directory_filter_query" autocomplete="off" spellcheck="false" placeholder="Filtrar usuarios por nombre, correo o rol...">
                             </div>
                             <button type="button" class="btn-action-primary" id="btn-new-user">
                                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -652,7 +704,7 @@
                                 </div>
                                 <div class="ota-version-badge">
                                     <span>Versión Actual</span>
-                                    <strong id="ota-current-version-label">v2.7.0</strong>
+                                    <strong id="ota-current-version-label">v2.8.2</strong>
                                 </div>
                             </div>
 
@@ -674,7 +726,7 @@
                                     <div class="form-group" style="flex:1.5;">
                                         <label>Token Personal GitHub (Opcional)</label>
                                         <div class="input-box">
-                                            <input type="password" id="cfg-github-token" placeholder="ghp_xxxxxxxxxxxx" title="Opcional: aumenta límites de consulta a la API de GitHub">
+                                            <input type="text" id="cfg-github-token" placeholder="ghp_xxxxxxxxxxxx (Solo si es privado)" autocomplete="off" data-lpignore="true" spellcheck="false" title="Opcional: Solo necesario si tu repositorio es privado en GitHub">
                                         </div>
                                     </div>
                                 </div>
@@ -1203,7 +1255,7 @@
                     <div class="form-group">
                         <label id="label-usuario-password">Contraseña *</label>
                         <div class="input-box">
-                            <input type="password" id="usuario-password" placeholder="••••••••••••">
+                            <input type="password" id="usuario-password" autocomplete="new-password" placeholder="••••••••••••">
                         </div>
                         <small id="hint-usuario-password" style="color:var(--text-muted); font-size:0.75rem; margin-top:4px; display:block;">Para usuarios nuevos la contraseña es obligatoria.</small>
                     </div>
@@ -1495,9 +1547,9 @@
     </div>
 
     <!-- Scripts del Sistema -->
-    <script src="assets/js/api.js?v=2.8.2"></script>
-    <script src="assets/js/auth.js?v=2.8.2"></script>
-    <script src="assets/js/app.js?v=2.8.2"></script>
-    <script src="assets/js/pwa.js?v=1.0.4"></script>
+    <script src="assets/js/api.js?v=3.0.0"></script>
+    <script src="assets/js/auth.js?v=3.0.0"></script>
+    <script src="assets/js/app.js?v=3.0.0"></script>
+    <script src="assets/js/pwa.js?v=1.0.5"></script>
 </body>
 </html>

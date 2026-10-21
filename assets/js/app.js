@@ -25,6 +25,7 @@ const App = {
     },
 
     async init() {
+        this.initTheme();
         this.setupNavigation();
         this.setupEventListeners();
 
@@ -52,6 +53,25 @@ const App = {
                 }
             }
         });
+    },
+
+    initTheme() {
+        try {
+            const savedTheme = localStorage.getItem('sm_saas_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        } catch (e) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+    },
+
+    toggleTheme() {
+        const current = document.documentElement.getAttribute('data-theme') || 'dark';
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        try {
+            localStorage.setItem('sm_saas_theme', next);
+        } catch (e) {}
+        API.showToast(next === 'light' ? 'Modo Claro SaaS activado' : 'Modo Oscuro Obsidian activado', 'info');
     },
 
     setupNavigation() {
@@ -285,13 +305,47 @@ const App = {
             });
         });
 
-        // Buscador de usuarios en tiempo real
+        // Buscador de usuarios en tiempo real (con protección contra autorrelleno del navegador)
         const searchUsers = document.getElementById('search-users-input');
         if (searchUsers) {
-            searchUsers.addEventListener('input', () => {
+            searchUsers.addEventListener('keydown', () => {
+                searchUsers.dataset.userTyped = 'true';
+            });
+            searchUsers.addEventListener('input', (e) => {
+                if (!searchUsers.dataset.userTyped && e.inputType && !e.inputType.startsWith('insertText') && !e.inputType.startsWith('deleteContent')) {
+                    searchUsers.value = '';
+                    return;
+                }
                 this.renderUsersList();
             });
         }
+
+        // Botón de cambio de tema (Oscuro / Claro SaaS)
+        const btnThemeToggle = document.getElementById('btn-theme-toggle');
+        if (btnThemeToggle) {
+            btnThemeToggle.addEventListener('click', () => this.toggleTheme());
+        }
+
+        // Atajo de teclado '/' o 'Ctrl+K' para enfocar el buscador activo
+        document.addEventListener('keydown', (e) => {
+            const activeTag = document.activeElement?.tagName?.toLowerCase();
+            const isTyping = activeTag === 'input' || activeTag === 'textarea' || activeTag === 'select' || document.activeElement?.isContentEditable;
+            if ((e.key === '/' && !isTyping) || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k')) {
+                e.preventDefault();
+                if (this.state.currentView === 'configuracion' && this.state.configTab === 'usuarios') {
+                    const uSearch = document.getElementById('search-users-input');
+                    if (uSearch) {
+                        uSearch.dataset.userTyped = 'true';
+                        uSearch.focus();
+                    }
+                } else {
+                    const gSearch = document.getElementById('global-search');
+                    if (gSearch && gSearch.offsetParent !== null) {
+                        gSearch.focus();
+                    }
+                }
+            }
+        });
 
         // Botón "+ Nuevo Usuario"
         const btnNewUser = document.getElementById('btn-new-user');
@@ -3176,7 +3230,15 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
 
         const repo = document.getElementById('cfg-github-repo')?.value.trim() || 'networkturbo4-pixel/streampro';
         const branch = document.getElementById('cfg-github-branch')?.value.trim() || 'main';
-        const token = document.getElementById('cfg-github-token')?.value.trim() || '';
+        let token = document.getElementById('cfg-github-token')?.value.trim() || '';
+
+        // Si el token es solo puntos o asteriscos (autocompletado por el gestor de contraseñas), limpiarlo
+        if (/^[•*]+$/.test(token)) {
+            token = '';
+            if (document.getElementById('cfg-github-token')) {
+                document.getElementById('cfg-github-token').value = '';
+            }
+        }
 
         try {
             await API.post('configuracion.php?action=save_settings', {
@@ -3198,11 +3260,28 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
 
             if (!res.success) {
                 this.appendOTALog(`Fallo en verificación: ${res.message || 'Error de conexión'}`, 'error');
+                if (statusBox && statusContent) {
+                    statusBox.style.display = 'block';
+                    statusContent.innerHTML = `
+                        <div class="ota-status-inner alert">
+                            <div class="ota-status-icon">❌</div>
+                            <div>
+                                <strong style="color:#ef4444; font-size:1rem;">Error de Conexión con GitHub</strong>
+                                <p style="margin:4px 0 6px 0; color:#e2e8f0; font-size:0.86rem;">${this.escapeHtml(res.message || 'No se pudo contactar con GitHub')}</p>
+                                <small class="text-muted">Si el repositorio es público, deja el campo de Token vacío.</small>
+                            </div>
+                        </div>
+                    `;
+                }
                 API.showToast(res.message || 'Error al conectar con GitHub', 'error');
                 return;
             }
 
             this.state.otaStatus = res;
+
+            if (res.warning) {
+                this.appendOTALog(`[Aviso] ${res.warning}`, 'warn');
+            }
 
             if (statusBox) statusBox.style.display = 'block';
 
@@ -3215,7 +3294,7 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
                             <div>
                                 <strong style="color:#fbbf24; font-size:1rem;">Repositorio conectado (${this.escapeHtml(repo)})</strong>
                                 <p style="margin:4px 0 6px 0; color:#e2e8f0; font-size:0.86rem;">${this.escapeHtml(res.message)}</p>
-                                <small class="text-muted">Rama monitoreada: <code>${this.escapeHtml(branch)}</code> | Versión actual instalada: <code>v${this.escapeHtml(res.current_version)}</code></small>
+                                <small class="text-muted">Rama monitoreada: <code>${this.escapeHtml(branch)}</code> | Versión actual instalada: <code>v${this.escapeHtml(res.current_version || '2.8.2')}</code></small>
                             </div>
                         </div>
                     `;
@@ -3237,7 +3316,7 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
                                 <div style="font-size:0.78rem; color:var(--text-muted); display:flex; gap:16px; flex-wrap:wrap;">
                                     <span>Autor: <strong style="color:#fff;">${this.escapeHtml(c.author)}</strong></span>
                                     <span>Fecha: <strong style="color:#fff;">${c.date ? c.date.substring(0, 10) : ''}</strong></span>
-                                    <span>Versión actual: <strong>v${this.escapeHtml(res.current_version)}</strong></span>
+                                    <span>Versión actual: <strong>v${this.escapeHtml(res.current_version || '2.8.2')}</strong></span>
                                 </div>
                             </div>
                         </div>
@@ -3245,7 +3324,9 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
                 }
                 API.showToast('¡Nueva actualización disponible en GitHub!', 'success');
             } else {
-                this.appendOTALog(`Sistema al día. Último commit verificado: ${res.last_commit || 'v' + res.current_version}`, 'success');
+                const latestSha = res.remote_commit?.short_sha || (res.last_commit && res.last_commit !== 'Ninguno' ? res.last_commit : 'Al día');
+                const activeVer = res.current_version || '2.8.2';
+                this.appendOTALog(`Sistema al día. Último commit verificado: [${latestSha}] (v${activeVer})`, 'success');
                 if (statusContent) {
                     statusContent.innerHTML = `
                         <div class="ota-status-inner success">
@@ -3253,7 +3334,7 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
                             <div>
                                 <strong style="color:#10b981; font-size:1rem;">Sistema Actualizado</strong>
                                 <p style="margin:4px 0 6px 0; color:#e2e8f0; font-size:0.86rem;">Tu instalación de StreamManager Pro tiene sincronizados los cambios más recientes de la rama <code>${this.escapeHtml(branch)}</code>.</p>
-                                <small class="text-muted">Versión activa: <code>v${this.escapeHtml(res.current_version)}</code> | Commit: <code>${this.escapeHtml(res.last_commit)}</code></small>
+                                <small class="text-muted">Versión activa: <code>v${this.escapeHtml(activeVer)}</code> | Commit: <code>${this.escapeHtml(latestSha)}</code></small>
                             </div>
                         </div>
                     `;

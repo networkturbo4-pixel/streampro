@@ -36,6 +36,79 @@ if (!$isSuperAdmin) {
     }
 }
 
+/**
+ * Cliente HTTP robusto para la API de GitHub
+ * Soporta cURL con redirecciones, omite contraseñas autocompletadas por el navegador
+ * y reintenta automáticamente como repositorio público si el token no es válido.
+ */
+function fetchGitHubApi(string $url, string $token = '', int $timeout = 15): array {
+    $cleanToken = trim($token);
+    // Ignorar contraseñas autocompletadas por el navegador (ej: puntos, asteriscos o claves cortas)
+    $isTokenValid = (!empty($cleanToken) && !preg_match('/^[•*]+$/', $cleanToken) && strlen($cleanToken) >= 15);
+
+    $makeRequest = function($useToken) use ($url, $cleanToken, $timeout) {
+        $headers = [
+            'User-Agent: StreamManagerPro-OTA-Updater/2.8',
+            'Accept: application/vnd.github.v3+json'
+        ];
+        if ($useToken && !empty($cleanToken)) {
+            $headers[] = "Authorization: token {$cleanToken}";
+        }
+
+        if (function_exists('curl_init')) {
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_USERAGENT, 'StreamManagerPro-OTA-Updater/2.8');
+            $body = curl_exec($ch);
+            $code = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $err = curl_error($ch);
+            curl_close($ch);
+            return ['code' => $code, 'body' => $body, 'error' => $err];
+        } else {
+            $ctx = stream_context_create([
+                'http' => [
+                    'method'          => 'GET',
+                    'header'          => implode("\r\n", $headers),
+                    'timeout'         => $timeout,
+                    'ignore_errors'   => true,
+                    'follow_location' => 1
+                ],
+                'ssl' => ['verify_peer' => false, 'verify_peer_name' => false]
+            ]);
+            $body = @file_get_contents($url, false, $ctx);
+            $code = 200;
+            if (isset($http_response_header)) {
+                foreach ($http_response_header as $hdr) {
+                    if (preg_match('/^HTTP\/\S+\s+(\d+)/', $hdr, $m)) {
+                        $code = (int)$m[1];
+                        break;
+                    }
+                }
+            }
+            return ['code' => $code, 'body' => $body, 'error' => ''];
+        }
+    };
+
+    // Primer intento con token si tiene formato válido
+    $res = $makeRequest($isTokenValid);
+
+    // Si devuelve 401 (Bad credentials) y se había enviado token, reintentar automáticamente sin token
+    if ($res['code'] === 401 && $isTokenValid) {
+        $retry = $makeRequest(false);
+        if ($retry['code'] === 200) {
+            $retry['warning'] = 'El token configurado no es válido para GitHub; se consultó el repositorio público sin token.';
+            return $retry;
+        }
+    }
+
+    return $res;
+}
+
 switch ($action) {
 
     // =========================================================================
@@ -394,7 +467,7 @@ switch ($action) {
         $repo = trim($settings['github_repo'] ?? 'networkturbo4-pixel/streampro');
         $branch = trim($settings['github_branch'] ?? 'main');
         $token = trim($settings['github_token'] ?? '');
-        $currentVersion = $settings['sistema_version'] ?? '2.7.0';
+        $currentVersion = $settings['sistema_version'] ?? '2.8.2';
         $lastCommit = $settings['github_last_commit'] ?? '';
 
         if (empty($repo)) {
@@ -403,66 +476,20 @@ switch ($action) {
 
         // Consultar API de GitHub para obtener el commit más reciente
         $apiUrl = "https://api.github.com/repos/{$repo}/commits/{$branch}";
-        
-        $headers = [
-            'User-Agent: StreamManagerPro-OTA-Updater/2.7',
-            'Accept: application/vnd.github.v3+json'
-        ];
-        if (!empty($token)) {
-            $headers[] = "Authorization: token {$token}";
-        }
-
-        $response = null;
-        $statusCode = 200;
-
-        if (function_exists('curl_init')) {
-            $ch = curl_init($apiUrl);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 12);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-            curl_setopt($ch, CURLOPT_USERAGENT, 'StreamManagerPro-OTA-Updater/2.7');
-            $response = curl_exec($ch);
-            $statusCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-        } else {
-            $context = stream_context_create([
-                'http' => [
-                    'method'        => 'GET',
-                    'header'        => implode("\r\n", $headers),
-                    'timeout'       => 10,
-                    'ignore_errors' => true
-                ],
-                'ssl' => [
-                    'verify_peer'      => false,
-                    'verify_peer_name' => false
-                ]
-            ]);
-
-            $response = @file_get_contents($apiUrl, false, $context);
-            if (isset($http_response_header)) {
-                foreach ($http_response_header as $hdr) {
-                    if (preg_match('/^HTTP\/\S+\s+(\d+)/', $hdr, $m)) {
-                        $statusCode = (int)$m[1];
-                        break;
-                    }
-                }
-            }
-        }
-
+        $apiRes = fetchGitHubApi($apiUrl, $token, 15);
+        $statusCode = $apiRes['code'];
+        $response = $apiRes['body'];
         $commitData = @json_decode($response, true);
 
-        if ($statusCode === 404 || $statusCode === 409 || ($commitData && isset($commitData['message']) && stripos($commitData['message'], 'empty') !== false)) {
-            // Puede ser un repo recién creado o sin commits aún
+        if ($statusCode === 401) {
             jsonResponse([
-                'success'          => true,
-                'status'           => 'empty_or_not_found',
+                'success'          => false,
                 'update_available' => false,
-                'message'          => 'El repositorio GitHub está conectado correctamente, pero aún no tiene commits publicados en la rama ' . $branch . '.',
+                'message'          => 'Token de GitHub inválido o expirado (401 Bad Credentials). Si el repositorio es público, deja el campo de Token vacío.',
+                'current_version'  => $currentVersion,
+                'last_commit'      => $lastCommit ? substr($lastCommit, 0, 7) : 'Ninguno',
                 'repo'             => $repo,
-                'branch'           => $branch,
-                'current_version'  => $currentVersion
+                'branch'           => $branch
             ]);
             break;
         }
@@ -471,18 +498,37 @@ switch ($action) {
             jsonResponse([
                 'success'          => false,
                 'update_available' => false,
-                'message'          => 'Límite de solicitudes de GitHub API excedido o token inválido.',
+                'message'          => 'Límite de solicitudes de GitHub API excedido o permisos insuficientes (403 Forbidden).',
+                'current_version'  => $currentVersion,
+                'last_commit'      => $lastCommit ? substr($lastCommit, 0, 7) : 'Ninguno',
                 'repo'             => $repo,
                 'branch'           => $branch
             ]);
             break;
         }
 
-        if (!$commitData || empty($commitData['sha'])) {
+        if ($statusCode === 404 || $statusCode === 409 || ($commitData && isset($commitData['message']) && stripos($commitData['message'], 'empty') !== false)) {
             jsonResponse([
                 'success'          => true,
+                'status'           => 'empty_or_not_found',
                 'update_available' => false,
-                'message'          => 'No se pudo obtener información del commit remoto en GitHub.',
+                'message'          => 'El repositorio GitHub está conectado, pero no se encontraron commits en la rama ' . $branch . ' (o el repositorio es privado y requiere token).',
+                'repo'             => $repo,
+                'branch'           => $branch,
+                'current_version'  => $currentVersion,
+                'last_commit'      => $lastCommit ? substr($lastCommit, 0, 7) : 'Ninguno'
+            ]);
+            break;
+        }
+
+        if (!$commitData || empty($commitData['sha'])) {
+            $errMsg = $commitData['message'] ?? 'No se pudo obtener información del commit remoto en GitHub.';
+            jsonResponse([
+                'success'          => false,
+                'update_available' => false,
+                'message'          => "Error de GitHub ({$statusCode}): {$errMsg}",
+                'current_version'  => $currentVersion,
+                'last_commit'      => $lastCommit ? substr($lastCommit, 0, 7) : 'Ninguno',
                 'repo'             => $repo,
                 'branch'           => $branch
             ]);
@@ -502,6 +548,7 @@ switch ($action) {
             'update_available' => $isNewUpdate,
             'current_version'  => $currentVersion,
             'last_commit'      => $lastCommit ? substr($lastCommit, 0, 7) : 'Ninguno',
+            'warning'          => $apiRes['warning'] ?? null,
             'repo'             => $repo,
             'branch'           => $branch,
             'remote_commit'    => [
@@ -526,6 +573,18 @@ switch ($action) {
         $logs[] = "Iniciando proceso de actualización segura OTA...";
         $logs[] = "Repositorio objetivo: {$repo} [Rama: {$branch}]";
 
+        // Si no se proporcionó targetSha, obtenerlo de GitHub
+        if (empty($targetSha)) {
+            $apiCheck = fetchGitHubApi("https://api.github.com/repos/{$repo}/commits/{$branch}", $token, 12);
+            if ($apiCheck['code'] === 200) {
+                $cData = @json_decode($apiCheck['body'], true);
+                if (!empty($cData['sha'])) {
+                    $targetSha = $cData['sha'];
+                    $logs[] = "Último commit detectado en GitHub: " . substr($targetSha, 0, 7);
+                }
+            }
+        }
+
         // Método A: Intento mediante comando local Git si el repo está clonado
         $gitPulled = false;
         $projectRoot = dirname(__DIR__);
@@ -549,32 +608,12 @@ switch ($action) {
         if (!$gitPulled) {
             $logs[] = "Descargando paquete de actualización desde GitHub API...";
             $zipUrl = "https://api.github.com/repos/{$repo}/zipball/{$branch}";
-            
-            $headers = [
-                'User-Agent: StreamManagerPro-OTA-Updater/2.7',
-                'Accept: application/vnd.github.v3+json'
-            ];
-            if (!empty($token)) {
-                $headers[] = "Authorization: token {$token}";
-            }
+            $zipRes = fetchGitHubApi($zipUrl, $token, 60);
 
-            $context = stream_context_create([
-                'http' => [
-                    'method'          => 'GET',
-                    'header'          => implode("\r\n", $headers),
-                    'timeout'         => 60,
-                    'follow_location' => 1
-                ],
-                'ssl' => [
-                    'verify_peer'      => false,
-                    'verify_peer_name' => false
-                ]
-            ]);
-
-            $zipContent = @file_get_contents($zipUrl, false, $context);
-            if ($zipContent === false || strlen($zipContent) < 100) {
-                $logs[] = "Aviso: No se pudo descargar el archivo ZIP remoto (posiblemente la rama está vacía o sin commits aún).";
+            if ($zipRes['code'] !== 200 || empty($zipRes['body']) || strlen($zipRes['body']) < 100) {
+                $logs[] = "Aviso: No se pudo descargar el archivo ZIP remoto (Código HTTP {$zipRes['code']}).";
             } else {
+                $zipContent = $zipRes['body'];
                 $tempZipPath = $projectRoot . '/tmp_update_' . time() . '.zip';
                 file_put_contents($tempZipPath, $zipContent);
                 $logs[] = "Archivo ZIP descargado (" . round(strlen($zipContent) / 1024, 1) . " KB).";
@@ -604,7 +643,12 @@ switch ($action) {
                                     if (is_dir($src . '/' . $file)) {
                                         $copyRecursive($src . '/' . $file, $dst . '/' . $file);
                                     } else {
-                                        // Omitir sobreescribir configs sensibles de entorno si existiesen
+                                        // Omitir sobreescribir configs sensibles de entorno local si existiesen
+                                        if (in_array(strtolower($file), ['config.php', '.env'])) {
+                                            if (file_exists($dst . '/' . $file)) {
+                                                continue;
+                                            }
+                                        }
                                         copy($src . '/' . $file, $dst . '/' . $file);
                                     }
                                 }
@@ -651,13 +695,26 @@ switch ($action) {
             $logs[] = "La estructura de base de datos ya se encuentra al día. No se requirieron cambios.";
         }
 
-        // Paso 4: Actualizar último commit registrado en configuración
+        // Paso 4: Actualizar último commit y versión registrados en configuración
         if (!empty($targetSha)) {
             $db->prepare("INSERT INTO configuracion (clave, valor) VALUES ('github_last_commit', ?) ON DUPLICATE KEY UPDATE valor = VALUES(valor)")
                ->execute([$targetSha]);
         }
+        $db->prepare("INSERT INTO configuracion (clave, valor) VALUES ('sistema_version', '2.8.2') ON DUPLICATE KEY UPDATE valor = VALUES(valor)")
+           ->execute();
 
         $logs[] = "Todos los datos de clientes, cuentas y perfiles existentes se han mantenido 100% intactos.";
+        $logs[] = "¡Actualización finalizada con éxito!";
+
+        jsonResponse([
+            'success'            => true,
+            'message'            => 'Actualización del sistema completada con éxito.',
+            'new_version'        => '2.8.2',
+            'last_commit'        => !empty($targetSha) ? substr($targetSha, 0, 7) : 'Al día',
+            'migrations_applied' => $appliedMigrations,
+            'logs'               => $logs
+        ]);
+        break;
         $logs[] = "¡Actualización finalizada con éxito!";
 
         jsonResponse([
