@@ -32,7 +32,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 
     <!-- CSS del Sistema -->
-    <link rel="stylesheet" href="assets/css/style.css?v=2.7.0">
+    <link rel="stylesheet" href="assets/css/style.css?v=2.8.2">
 </head>
 <body>
 
@@ -319,6 +319,7 @@
                             <option value="por_vencer">⚠️ Por Vencer (≤3 días)</option>
                             <option value="vencida">❌ Vencidas</option>
                             <option value="disponible">✨ Disponibles (Perfiles)</option>
+                            <option value="archivado">📦 Archivados</option>
                         </select>
                     </div>
                 </div>
@@ -432,6 +433,12 @@
                             <table class="modern-table">
                                 <thead>
                                     <tr>
+                                        <th class="th-checkbox" style="width: 44px; text-align: center;">
+                                            <label class="custom-chk-table" title="Seleccionar todos los perfiles">
+                                                <input type="checkbox" id="check-all-perfiles">
+                                                <span class="chk-box"></span>
+                                            </label>
+                                        </th>
                                         <th>Perfil / Plataforma</th>
                                         <th>Cuenta Maestra / PIN</th>
                                         <th>Cliente Asignado</th>
@@ -444,6 +451,31 @@
                                     <!-- Filas de perfiles -->
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+
+                    <!-- Barra Flotante de Acciones Masivas -->
+                    <div id="perfiles-bulk-bar" class="bulk-actions-bar hidden animate-slide-up">
+                        <div class="bulk-bar-info">
+                            <span class="bulk-badge-count" id="bulk-selected-count">0</span>
+                            <span class="bulk-text-label">seleccionados</span>
+                        </div>
+                        <div class="bulk-bar-actions">
+                            <button type="button" class="btn-bulk-act btn-bulk-edit" id="btn-bulk-edit" title="Editar campos en lote">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                <span>Editar</span>
+                            </button>
+                            <button type="button" class="btn-bulk-act btn-bulk-archive" id="btn-bulk-archive" title="Archivar o desarchivar seleccionados">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+                                <span id="bulk-archive-text">Archivar</span>
+                            </button>
+                            <button type="button" class="btn-bulk-act btn-bulk-delete" id="btn-bulk-delete" title="Eliminar seleccionados permanentemente">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                                <span>Eliminar</span>
+                            </button>
+                            <button type="button" class="btn-bulk-close" id="btn-bulk-deselect" title="Cancelar selección">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
                         </div>
                     </div>
                 </section>
@@ -899,7 +931,13 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label>PIN de Pantalla / Perfil</label>
+                            <div class="field-header-row">
+                                <label for="assign-perfil-pin" style="margin-bottom:0;">PIN de Pantalla / Perfil</label>
+                                <button type="button" id="btn-use-master-pin" class="btn-use-master-pin" onclick="App.useMasterAccountPin()" title="Usar el mismo PIN de la cuenta principal">
+                                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    <span id="label-use-master-pin-text">Usar PIN Cuenta</span>
+                                </button>
+                            </div>
                             <div class="input-box">
                                 <input type="text" id="assign-perfil-pin" placeholder="Ej: 1234">
                             </div>
@@ -1343,10 +1381,123 @@
         </div>
     </div>
 
+    <!-- =====================================================================
+         MODAL 7: EDICIÓN MASIVA DE PERFILES / PANTALLAS
+         ===================================================================== -->
+    <div id="modal-bulk-edit-perfiles" class="modal-overlay">
+        <div class="modal-container" style="max-width: 540px;">
+            <div class="modal-header">
+                <div>
+                    <h3 id="modal-bulk-edit-title">Edición Masiva de Perfiles</h3>
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+                        Modificando <strong id="bulk-edit-count" style="color:#818cf8;">0</strong> perfiles seleccionados. Activa los campos que deseas cambiar.
+                    </p>
+                </div>
+                <button type="button" class="btn-close-modal" title="Cerrar">&times;</button>
+            </div>
+            <form id="form-bulk-edit-perfiles">
+                <div class="modal-body" style="display:flex; flex-direction:column; gap:14px; max-height: 70vh; overflow-y: auto;">
+                    <!-- Campo: Precio Mensual -->
+                    <div class="bulk-field-card">
+                        <label class="bulk-field-toggle">
+                            <input type="checkbox" id="bulk-chk-precio">
+                            <span class="chk-box"></span>
+                            <span class="bulk-field-title">Actualizar Precio Mensual (S/)</span>
+                        </label>
+                        <div class="bulk-field-input" id="bulk-group-precio" style="display:none; margin-top:10px;">
+                            <div class="input-box">
+                                <input type="number" id="bulk-val-precio" step="0.50" min="0" placeholder="Ej: 12.00">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Campo: PIN de Perfil -->
+                    <div class="bulk-field-card">
+                        <label class="bulk-field-toggle">
+                            <input type="checkbox" id="bulk-chk-pin">
+                            <span class="chk-box"></span>
+                            <span class="bulk-field-title">Asignar / Cambiar PIN de Perfil</span>
+                        </label>
+                        <div class="bulk-field-input" id="bulk-group-pin" style="display:none; margin-top:10px;">
+                            <div class="input-box">
+                                <input type="text" id="bulk-val-pin" maxlength="10" placeholder="Ej: 1234">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Campo: Tipo de Dispositivo -->
+                    <div class="bulk-field-card">
+                        <label class="bulk-field-toggle">
+                            <input type="checkbox" id="bulk-chk-dispositivo">
+                            <span class="chk-box"></span>
+                            <span class="bulk-field-title">Cambiar Tipo de Dispositivo</span>
+                        </label>
+                        <div class="bulk-field-input" id="bulk-group-dispositivo" style="display:none; margin-top:10px;">
+                            <div class="input-box">
+                                <select id="bulk-val-dispositivo" style="width:100%; background:transparent; border:none; color:#fff; outline:none; font-size:0.9rem;">
+                                    <option value="tv" style="background:#111827; color:#fff;">📺 Smart TV</option>
+                                    <option value="android" style="background:#111827; color:#fff;">📱 Móvil Android</option>
+                                    <option value="iphone" style="background:#111827; color:#fff;">🍏 iPhone / iPad</option>
+                                    <option value="pc" style="background:#111827; color:#fff;">💻 PC / Laptop</option>
+                                    <option value="otro" style="background:#111827; color:#fff;">🔌 Otro Dispositivo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Campo: Extender o Asignar Vencimiento -->
+                    <div class="bulk-field-card">
+                        <label class="bulk-field-toggle">
+                            <input type="checkbox" id="bulk-chk-venc">
+                            <span class="chk-box"></span>
+                            <span class="bulk-field-title">Extender / Modificar Vencimiento</span>
+                        </label>
+                        <div class="bulk-field-input" id="bulk-group-venc" style="display:none; margin-top:10px;">
+                            <div style="display:flex; flex-direction:column; gap:10px;">
+                                <div style="display:flex; gap:16px; align-items:center;">
+                                    <label style="font-size:0.85rem; color:#cbd5e1; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                        <input type="radio" name="bulk_venc_mode" value="dias" checked> <span>Sumar días</span>
+                                    </label>
+                                    <label style="font-size:0.85rem; color:#cbd5e1; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                        <input type="radio" name="bulk_venc_mode" value="fecha"> <span>Fecha fija</span>
+                                    </label>
+                                </div>
+                                <div class="input-box" id="bulk-box-dias">
+                                    <input type="number" id="bulk-val-dias" min="1" max="365" value="30" placeholder="Días a sumar (Ej: 30)">
+                                </div>
+                                <div class="input-box" id="bulk-box-fecha" style="display:none;">
+                                    <input type="date" id="bulk-val-fecha">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Campo: Notas -->
+                    <div class="bulk-field-card">
+                        <label class="bulk-field-toggle">
+                            <input type="checkbox" id="bulk-chk-notas">
+                            <span class="chk-box"></span>
+                            <span class="bulk-field-title">Actualizar Notas / Observaciones</span>
+                        </label>
+                        <div class="bulk-field-input" id="bulk-group-notas" style="display:none; margin-top:10px;">
+                            <div class="input-box">
+                                <textarea id="bulk-val-notas" rows="2" placeholder="Notas para los perfiles seleccionados..." style="width:100%; background:transparent; border:none; color:#fff; outline:none; resize:vertical; font-size:0.88rem;"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-action-secondary btn-close-modal">Cancelar</button>
+                    <button type="submit" class="btn-action-primary" id="btn-submit-bulk-edit">Aplicar a Perfiles</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Scripts del Sistema -->
-    <script src="assets/js/api.js?v=2.7.0"></script>
-    <script src="assets/js/auth.js?v=2.7.0"></script>
-    <script src="assets/js/app.js?v=2.7.0"></script>
-    <script src="assets/js/pwa.js?v=1.0.1"></script>
+    <script src="assets/js/api.js?v=2.8.2"></script>
+    <script src="assets/js/auth.js?v=2.8.2"></script>
+    <script src="assets/js/app.js?v=2.8.2"></script>
+    <script src="assets/js/pwa.js?v=1.0.4"></script>
 </body>
 </html>

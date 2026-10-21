@@ -1,0 +1,83 @@
+================================================================================
+GUÍA DE INSTALACIÓN Y SUBIDA A CPANEL - STREAMMANAGER PRO
+================================================================================
+
+Este paquete contiene todos los archivos necesarios y optimizados para funcionar
+en cualquier hosting con cPanel y PHP 7.4 o superior (recomendado PHP 8.0, 8.1 o 8.2).
+
+--------------------------------------------------------------------------------
+PASO 1: CREAR LA BASE DE DATOS Y USUARIO EN CPANEL
+--------------------------------------------------------------------------------
+1. Inicia sesión en tu cuenta de cPanel.
+2. Dirígete a la sección "Bases de datos" y haz clic en "Bases de datos MySQL".
+3. En "Crear una nueva base de datos", escribe un nombre (ejemplo: stream).
+   - El nombre completo será algo como: minombre_stream. Anótalo.
+4. En "Añadir nuevo usuario", crea un usuario (ejemplo: adminstream) y genera una
+   contraseña segura. Guarda la contraseña.
+   - El usuario completo será algo como: minombre_adminstream.
+5. En "Añadir usuario a la base de datos":
+   - Selecciona el usuario recién creado y la base de datos recién creada.
+   - Haz clic en "Añadir".
+   - Marca la casilla "[X] TODOS LOS PRIVILEGIOS" (ALL PRIVILEGES).
+   - Haz clic en "Hacer cambios".
+
+--------------------------------------------------------------------------------
+PASO 2: IMPORTAR LA BASE DE DATOS (database.sql)
+--------------------------------------------------------------------------------
+1. En el cPanel principal, ve a la herramienta "phpMyAdmin".
+2. En la columna izquierda de phpMyAdmin, haz clic sobre el nombre de tu base
+   de datos (ejemplo: minombre_stream).
+3. Haz clic en la pestaña superior "Importar".
+4. En "Seleccionar archivo", elige el archivo "database.sql" que está en esta carpeta.
+5. Baja al final de la página y haz clic en el botón "Continuar" / "Importar".
+6. Verás un mensaje verde indicando que todas las tablas y datos iniciales
+   se importaron exitosamente.
+
+--------------------------------------------------------------------------------
+PASO 3: SUBIR LOS ARCHIVOS A CPANEL
+--------------------------------------------------------------------------------
+1. En cPanel, entra en "Administrador de archivos" (File Manager).
+2. Entra a la carpeta raíz de tu dominio:
+   - Si es tu dominio principal: entra a la carpeta "public_html".
+   - Si es un subdominio o carpeta: entra a la carpeta asignada (ej: app.tudominio.com).
+3. Si hay un archivo index.php o default.html por defecto del hosting, bórralo.
+4. Haz clic en el botón "Cargar" (Upload) arriba en la barra de herramientas.
+5. Sube el archivo ZIP generado: "stream_manager_cpanel.zip".
+6. Una vez completada la subida (barra verde al 100%), vuelve al Administrador de archivos.
+7. Haz clic derecho sobre "stream_manager_cpanel.zip" y selecciona "Extraer" (Extract).
+8. Verifica que los archivos queden directamente dentro de public_html (no dentro de
+   una subcarpeta repetida).
+   Deberás ver: index.html, index.php, config.php, api/, assets/, .htaccess, etc.
+
+--------------------------------------------------------------------------------
+PASO 4: CONFIGURAR LA CONEXIÓN A LA BASE DE DATOS (config.php)
+--------------------------------------------------------------------------------
+1. En el Administrador de archivos de cPanel, busca el archivo "config.php".
+2. Haz clic derecho sobre él y selecciona "Edit" (Editar).
+3. Modifica únicamente estas tres líneas con los datos creados en el PASO 1:
+
+   define('DB_NAME', 'minombre_stream');       // Tu base de datos de cPanel
+   define('DB_USER', 'minombre_adminstream');  // Tu usuario de cPanel
+   define('DB_PASS', 'TuPasswordSeguro123!');  // Tu contraseña
+
+4. Haz clic en "Guardar cambios" (Save Changes) arriba a la derecha.
+
+--------------------------------------------------------------------------------
+PASO 5: INGRESAR AL SISTEMA
+--------------------------------------------------------------------------------
+1. Abre tu navegador web e ingresa a tu dominio o subdominio:
+   https://tudominio.com
+2. Accede con las credenciales maestras por defecto:
+   - Correo:     admin@stream.app
+   - Contraseña: admin123
+3. ¡Listo! El sistema estará 100% operativo.
+   Recomendación: Cambia la contraseña desde el módulo de Configuración -> Usuarios.
+
+--------------------------------------------------------------------------------
+COMPROBADOR DE ESTADO (OPCIONAL):
+--------------------------------------------------------------------------------
+Si deseas comprobar que la conexión a MySQL y las tablas están correctas, puedes
+abrir en tu navegador:
+   https://tudominio.com/api/setup.php
+Este script te mostrará en verde la confirmación de la conexión y las tablas.
+================================================================================

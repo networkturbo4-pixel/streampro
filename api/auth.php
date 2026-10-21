@@ -5,11 +5,18 @@ $action = $_GET['action'] ?? '';
 $db = getDBConnection();
 
 // Asegurar que existe al menos un usuario admin para pruebas inmediatas
-$checkAdmin = $db->query("SELECT COUNT(*) as total FROM administradores")->fetch();
-if (!$checkAdmin || $checkAdmin['total'] == 0) {
-    $hash = password_hash('admin123', PASSWORD_BCRYPT);
-    $stmt = $db->prepare("INSERT INTO administradores (nombre, email, password_hash, rol) VALUES (?, ?, ?, ?)");
-    $stmt->execute(['Administrador Pro', 'admin@stream.app', $hash, 'admin']);
+try {
+    $checkAdmin = $db->query("SELECT COUNT(*) as total FROM administradores")->fetch();
+    if (!$checkAdmin || $checkAdmin['total'] == 0) {
+        $hash = password_hash('admin123', PASSWORD_BCRYPT);
+        $stmt = $db->prepare("INSERT INTO administradores (nombre, email, password_hash, rol) VALUES (?, ?, ?, ?)");
+        $stmt->execute(['Administrador Pro', 'admin@stream.app', $hash, 'admin']);
+    }
+} catch (Exception $e) {
+    if (strpos($e->getMessage(), "doesn't exist") !== false || strpos($e->getMessage(), "Base table") !== false) {
+        jsonError("Las tablas no han sido importadas aún. Abre en tu navegador '/api/setup.php' o importa 'database.sql' en phpMyAdmin.", 500);
+    }
+    jsonError("Error de base de datos: " . $e->getMessage(), 500);
 }
 
 switch ($action) {

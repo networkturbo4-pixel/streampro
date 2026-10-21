@@ -8,7 +8,7 @@
  * - Peticiones API POST/PUT/DELETE: Network-Only con respuesta JSON amigable en caso offline
  */
 
-const CACHE_VERSION = 'v1.0.2';
+const CACHE_VERSION = 'v1.0.4';
 const STATIC_CACHE = `stream-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `stream-dynamic-${CACHE_VERSION}`;
 const API_CACHE = `stream-api-${CACHE_VERSION}`;

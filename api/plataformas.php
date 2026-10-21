@@ -56,6 +56,13 @@ switch ($method) {
         if ($maxPerfiles < 1) $maxPerfiles = 1;
         if ($maxPerfiles > 15) $maxPerfiles = 15;
 
+        // Validar que no exista ya una plataforma con el mismo nombre para evitar duplicados
+        $checkName = $db->prepare("SELECT id FROM plataformas WHERE LOWER(TRIM(nombre)) = LOWER(?)");
+        $checkName->execute([$nombre]);
+        if ($checkName->fetch()) {
+            jsonError("Ya existe una plataforma registrada con el nombre '{$nombre}'.", 409);
+        }
+
         // Generar código único para la plataforma
         $codigoBase = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $nombre));
         if (empty($codigoBase)) $codigoBase = 'plat';
@@ -99,6 +106,13 @@ switch ($method) {
 
         if (empty($nombre)) {
             jsonError('El nombre de la plataforma no puede estar vacío.', 422);
+        }
+
+        // Validar nombre único excluyendo la plataforma actual
+        $checkName = $db->prepare("SELECT id FROM plataformas WHERE LOWER(TRIM(nombre)) = LOWER(?) AND id != ?");
+        $checkName->execute([$nombre, $id]);
+        if ($checkName->fetch()) {
+            jsonError("Ya existe otra plataforma con el nombre '{$nombre}'.", 409);
         }
 
         $update = $db->prepare("

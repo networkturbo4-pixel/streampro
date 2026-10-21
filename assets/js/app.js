@@ -9,6 +9,7 @@ const App = {
         plataformas: [],
         cuentas: [],
         perfiles: [],
+        selectedPerfiles: new Set(),
         clientes: [],
         dashboard: null,
         users: [],
@@ -137,6 +138,27 @@ const App = {
             formPerfil.addEventListener('submit', (e) => this.handleSaveAssignProfile(e));
         }
 
+        // Listener para cambio en el selector de cliente en el modal de asignación
+        const assignClienteSelect = document.getElementById('assign-cliente-id');
+        if (assignClienteSelect) {
+            assignClienteSelect.addEventListener('change', (e) => {
+                const quickFields = document.getElementById('new-client-quick-fields');
+                const isNew = e.target.value === 'new';
+                if (quickFields) {
+                    quickFields.style.display = isNew ? 'flex' : 'none';
+                }
+                const newCliNombre = document.getElementById('new-cli-nombre');
+                const newCliTel = document.getElementById('new-cli-telefono');
+                if (newCliNombre) {
+                    newCliNombre.required = isNew;
+                    if (isNew) setTimeout(() => newCliNombre.focus(), 60);
+                }
+                if (newCliTel) {
+                    newCliTel.required = isNew;
+                }
+            });
+        }
+
         // Detectores de fechas en asignación de perfil para alerta en tiempo real
         const assignFechaInicio = document.getElementById('assign-fecha-inicio');
         if (assignFechaInicio) {
@@ -189,6 +211,66 @@ const App = {
                     colorPicker.value = e.target.value;
                 }
             });
+        }
+
+        // =========================================================
+        // ACCIONES MASIVAS Y CHECKBOXES (PERFILES / PANTALLAS)
+        // =========================================================
+        const checkAllPerfiles = document.getElementById('check-all-perfiles');
+        if (checkAllPerfiles) {
+            checkAllPerfiles.addEventListener('change', (e) => {
+                this.toggleSelectAllPerfiles(e.target.checked);
+            });
+        }
+
+        const btnBulkEdit = document.getElementById('btn-bulk-edit');
+        if (btnBulkEdit) {
+            btnBulkEdit.addEventListener('click', () => this.openBulkEditPerfilesModal());
+        }
+
+        const btnBulkArchive = document.getElementById('btn-bulk-archive');
+        if (btnBulkArchive) {
+            btnBulkArchive.addEventListener('click', () => this.handleBulkArchivePerfiles());
+        }
+
+        const btnBulkDelete = document.getElementById('btn-bulk-delete');
+        if (btnBulkDelete) {
+            btnBulkDelete.addEventListener('click', () => this.handleBulkDeletePerfiles());
+        }
+
+        const btnBulkDeselect = document.getElementById('btn-bulk-deselect');
+        if (btnBulkDeselect) {
+            btnBulkDeselect.addEventListener('click', () => this.clearSelectedPerfiles());
+        }
+
+        // Toggles y campos en modal de edición masiva
+        ['precio', 'pin', 'dispositivo', 'venc', 'notas'].forEach(field => {
+            const chk = document.getElementById(`bulk-chk-${field}`);
+            const grp = document.getElementById(`bulk-group-${field}`);
+            if (chk && grp) {
+                chk.addEventListener('change', () => {
+                    grp.style.display = chk.checked ? 'block' : 'none';
+                    const card = chk.closest('.bulk-field-card');
+                    if (card) card.classList.toggle('active', chk.checked);
+                });
+            }
+        });
+
+        // Radios de modo de vencimiento
+        document.querySelectorAll('input[name="bulk_venc_mode"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const isDias = e.target.value === 'dias';
+                const boxDias = document.getElementById('bulk-box-dias');
+                const boxFecha = document.getElementById('bulk-box-fecha');
+                if (boxDias) boxDias.style.display = isDias ? 'block' : 'none';
+                if (boxFecha) boxFecha.style.display = isDias ? 'none' : 'block';
+            });
+        });
+
+        // Formulario de edición masiva
+        const formBulkEdit = document.getElementById('form-bulk-edit-perfiles');
+        if (formBulkEdit) {
+            formBulkEdit.addEventListener('submit', (e) => this.handleSaveBulkEditPerfiles(e));
         }
 
         // =========================================================
@@ -326,6 +408,7 @@ const App = {
         }
 
         this.renderCurrentView();
+        this.updateBulkPerfilesBar();
     },
 
     async loadAllData() {
@@ -637,190 +720,226 @@ const App = {
     buildAccountCardHTML(c) {
         const isCompleta = c.tipo_cuenta === 'cuenta_completa';
         const perfiles = c.perfiles || [];
+        const totalSlots = perfiles.length;
+        const occupiedSlots = perfiles.filter(p => p.cliente_id).length;
+        const availableSlots = totalSlots - occupiedSlots;
 
         // Calcular días restantes de forma segura para zona horaria local
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const parts = c.fecha_vencimiento.split('-');
+        const parts = c.fecha_vencimiento ? c.fecha_vencimiento.split('-') : ['2026', '12', '31'];
         const vencDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
         const diffTime = vencDate - today;
         const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
         let daysTagClass = 'good';
-        let daysText = `${diffDays} días restantes`;
+        let daysText = `${diffDays}d restantes`;
         if (diffDays < 0) {
             daysTagClass = 'urgent';
-            daysText = `Venció hace ${Math.abs(diffDays)} días`;
+            daysText = `Venció hace ${Math.abs(diffDays)}d`;
         } else if (diffDays <= 3) {
             daysTagClass = 'warning';
-            daysText = `¡Vence en ${diffDays} días!`;
+            daysText = `¡Vence en ${diffDays}d!`;
         }
+
+        // Indicador visual de slots (puntitos de capacidad interactivos estilo app)
+        const dotsHTML = perfiles.map(p => {
+            const isOcc = !!p.cliente_id;
+            return `<span class="profile-dot ${isOcc ? 'occupied' : 'empty'}" title="${p.nombre_perfil}: ${isOcc ? (p.cliente_nombre || 'Ocupado') : 'Disponible'}"></span>`;
+        }).join('');
 
         return `
             <div class="account-card" id="account-card-${c.id}">
-                <!-- Header con Plataforma y Estado -->
+                <!-- Header con Plataforma, Tipo y Estado -->
                 <div class="card-top-header">
-                    <span class="platform-badge-brand" style="background: ${c.color_hex};">
-                        ${c.plataforma_nombre}
-                    </span>
-                    <span class="status-badge ${c.estado}">
-                        ${c.estado.replace('_', ' ')}
-                    </span>
+                    <div class="card-top-platform">
+                        <span class="platform-badge-brand" style="background: ${c.color_hex};">
+                            ${c.plataforma_nombre}
+                        </span>
+                        <span class="account-type-pill">
+                            ${isCompleta ? 'Cuenta Completa' : `${totalSlots} Pantallas`}
+                        </span>
+                    </div>
+                    <div class="card-top-status">
+                        <span class="status-badge ${c.estado}">
+                            ${c.estado.replace('_', ' ')}
+                        </span>
+                    </div>
                 </div>
 
-                <!-- Credenciales Maestras -->
+                <!-- Credenciales Maestras Compactas y Profesionales -->
                 <div class="credentials-box">
                     <div class="cred-row">
-                        <span class="cred-label">USUARIO / CORREO</span>
+                        <div class="cred-label-group">
+                            <span class="cred-label">CORREO / USUARIO</span>
+                        </div>
                         <div class="cred-value">
-                            <span>${c.correo}</span>
-                            <button class="btn-copy-mini" title="Copiar Usuario/Correo" onclick="App.copyText('${c.correo}', 'Usuario/correo copiado')">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            <span class="cred-text-user truncate" title="${c.correo}">${c.correo}</span>
+                            <button type="button" class="btn-copy-mini" title="Copiar Usuario/Correo" onclick="App.copyText('${c.correo}', 'Usuario/correo copiado')">
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                             </button>
                         </div>
                     </div>
-                    <div class="cred-row">
-                        <span class="cred-label">CONTRASEÑA</span>
-                        <div class="cred-value">
-                            <span id="pass-field-${c.id}" data-pass="${c.password}">••••••••</span>
-                            <button class="btn-copy-mini" title="Mostrar/Ocultar" onclick="App.togglePasswordVisibility(${c.id})">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            </button>
-                            <button class="btn-copy-mini" title="Copiar Contraseña" onclick="App.copyText('${c.password}', 'Contraseña copiada')">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                    ${c.pin_maestro ? `
-                    <div class="cred-row">
-                        <span class="cred-label">PIN MAESTRO</span>
-                        <div class="cred-value">
-                            <span>${c.pin_maestro}</span>
-                        </div>
-                    </div>` : ''}
-                </div>
 
-                <!-- Fechas y Vencimiento -->
-                <div class="date-row">
-                    <span>Vence: <strong>${c.fecha_vencimiento}</strong></span>
-                    <span class="days-tag ${daysTagClass}">${daysText}</span>
+                    <div class="cred-row">
+                        <div class="cred-label-group">
+                            <span class="cred-label">CONTRASEÑA</span>
+                        </div>
+                        <div class="cred-value">
+                            <span id="pass-field-${c.id}" class="cred-text-pass" data-pass="${c.password}">••••••••</span>
+                            <button type="button" class="btn-copy-mini" title="Mostrar/Ocultar" onclick="App.togglePasswordVisibility(${c.id})">
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                            <button type="button" class="btn-copy-mini" title="Copiar Contraseña" onclick="App.copyText('${c.password}', 'Contraseña copiada')">
+                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="cred-meta-row">
+                        <div class="cred-meta-left">
+                            ${c.pin_maestro ? `
+                                <span class="cred-pin-badge" title="PIN Maestro de la Cuenta">
+                                    <span>PIN:</span> <strong>${c.pin_maestro}</strong>
+                                </span>
+                            ` : `
+                                <span class="cred-pin-badge empty">Sin PIN maestro</span>
+                            `}
+                        </div>
+                        <div class="cred-meta-right">
+                            <span class="cred-due-label">Vence: <strong>${c.fecha_vencimiento}</strong></span>
+                            <span class="days-tag ${daysTagClass}">${daysText}</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Sección: Tipo de Cuenta (Completa vs Por Perfiles) -->
                 ${isCompleta ? `
-                    <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: var(--radius-sm); padding: 10px 12px;">
-                        <div style="font-size: 0.75rem; font-weight:700; color: #a5b4fc; text-transform:uppercase;">Cuenta Completa Asignada</div>
-                        <div style="font-size: 0.9rem; font-weight:700; color:#fff; margin-top:2px;">
-                            ${c.cliente_completo_nombre || 'Sin cliente asignado'}
+                    <div class="account-complete-card">
+                        <div class="complete-header-line">
+                            <div class="complete-icon-box">👑</div>
+                            <div class="complete-info-box truncate">
+                                <div class="complete-badge-label">Cuenta Completa Asignada</div>
+                                <div class="complete-client-name truncate">${c.cliente_completo_nombre || 'Sin cliente asignado'}</div>
+                            </div>
                         </div>
                         ${c.cliente_completo_telefono ? `
-                        <div style="margin-top:6px;">
-                            <button class="btn-slot-action wa" onclick="App.sendWhatsAppCredentialsCuenta(${c.id})">
+                            <button type="button" class="btn-complete-wa" onclick="App.sendWhatsAppCredentialsCuenta(${c.id})">
                                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-                                Enviar WhatsApp a Cliente
+                                <span>Enviar WhatsApp a Cliente</span>
                             </button>
-                        </div>` : ''}
+                        ` : ''}
                     </div>
                 ` : `
-                    <!-- Lista de Perfiles de la Cuenta -->
+                    <!-- Shelf de Perfiles / Pantallas Rediseñado -->
                     <div class="profiles-shelf">
-                        <div class="profiles-shelf-title">
-                            <span>Perfiles / Pantallas (${perfiles.filter(p => p.cliente_id).length}/${perfiles.length})</span>
-                            <span style="font-size:0.75rem; color:var(--text-secondary); cursor:pointer;" onclick="App.openAddSlotModal(${c.id})">+ Agregar Slot</span>
+                        <div class="profiles-shelf-header">
+                            <div class="shelf-title-left">
+                                <span class="shelf-label">PANTALLAS</span>
+                                <span class="shelf-count">(${occupiedSlots}/${totalSlots})</span>
+                                <div class="shelf-dots-bar" title="${occupiedSlots} ocupadas, ${availableSlots} libres">
+                                    ${dotsHTML}
+                                </div>
+                            </div>
+                            <button type="button" class="btn-add-slot-chip" onclick="App.openAddSlotModal(${c.id})" title="Añadir nueva pantalla o slot a esta cuenta">
+                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                <span>+ Slot</span>
+                            </button>
                         </div>
-                        ${perfiles.map(pf => {
-                            let profileDateInfo = '';
-                            let conflictTag = '';
-                            if (pf.cliente_id) {
+
+                        <div class="profiles-shelf-list">
+                            ${perfiles.map(pf => {
+                                const isOccupied = !!pf.cliente_id;
                                 let diffDaysPf = null;
-                                if (pf.fecha_vencimiento) {
+                                if (isOccupied && pf.fecha_vencimiento) {
                                     const pfParts = pf.fecha_vencimiento.split('-');
                                     const pfDate = new Date(parseInt(pfParts[0]), parseInt(pfParts[1]) - 1, parseInt(pfParts[2]));
                                     diffDaysPf = Math.round((pfDate - today) / (1000 * 60 * 60 * 24));
                                 }
 
-                                const isConflict = c.fecha_vencimiento && pf.fecha_vencimiento && (c.fecha_vencimiento < pf.fecha_vencimiento);
+                                const isConflict = isOccupied && c.fecha_vencimiento && pf.fecha_vencimiento && (c.fecha_vencimiento < pf.fecha_vencimiento);
+                                let diffConflict = 0;
                                 if (isConflict) {
                                     const cDate = new Date(c.fecha_vencimiento);
                                     const pfDate = new Date(pf.fecha_vencimiento);
-                                    const diffConflict = Math.round((pfDate - cDate) / (1000 * 60 * 60 * 24));
-                                    conflictTag = `
-                                        <div class="slot-conflict-tag" title="¡Atención! La cuenta principal vence ${diffConflict} días antes de la fecha contratada por el cliente">
-                                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                                            <span>Cuenta vence ${diffConflict}d antes que cliente</span>
-                                        </div>
-                                    `;
+                                    diffConflict = Math.round((pfDate - cDate) / (1000 * 60 * 60 * 24));
                                 }
 
-                                profileDateInfo = `
-                                    <div class="slot-dates-row">
-                                        <span class="slot-date-item">📅 Ingresó: <strong>${pf.fecha_inicio || '—'}</strong></span>
-                                        <span class="slot-date-item">⏳ Vence: <strong>${pf.fecha_vencimiento || '—'}</strong> ${diffDaysPf !== null ? `<span class="slot-due-badge ${diffDaysPf <= 3 ? 'warn' : ''}">(${diffDaysPf >= 0 ? `${diffDaysPf}d` : `venció hace ${Math.abs(diffDaysPf)}d`})</span>` : ''}</span>
-                                    </div>
-                                `;
-                            }
-
-                            return `
-                                <div class="profile-pill-item ${conflictTag ? 'has-conflict' : ''}">
-                                    <div class="profile-slot-info">
-                                        <div class="slot-avatar" style="${pf.cliente_id ? 'background: #065f46; color:#34d399;' : 'background: #1e293b; color:#94a3b8;'}">
-                                            ${pf.numero_perfil}
-                                        </div>
-                                        <div class="slot-text">
-                                            <div class="slot-name">${pf.nombre_perfil} ${pf.pin_perfil ? `<span style="font-size:0.72rem; color:var(--text-muted); font-weight:normal;">(PIN: ${pf.pin_perfil})</span>` : ''}</div>
-                                            <div class="slot-sub">
-                                                ${pf.cliente_nombre ? `👤 <strong style="color:#fff;">${pf.cliente_nombre}</strong>` : `<span style="color:#38bdf8; font-weight:700;">✨ Disponible</span>`}
+                                return `
+                                    <div class="slot-item-card ${isConflict ? 'has-conflict' : ''} ${isOccupied ? 'is-occupied' : 'is-free'}">
+                                        <!-- Línea 1: Identificador + PIN + Dispositivo + Acciones -->
+                                        <div class="slot-item-header">
+                                            <div class="slot-identity truncate">
+                                                <span class="slot-pill-num ${isOccupied ? 'occupied' : 'free'}">${pf.numero_perfil}</span>
+                                                <strong class="slot-title truncate">${pf.nombre_perfil}</strong>
+                                                ${pf.pin_perfil ? `<span class="slot-pin-chip" title="PIN de pantalla">🔑 ${pf.pin_perfil}</span>` : ''}
+                                                ${isOccupied && pf.dispositivo ? this.getDeviceBadgeHTML(pf.dispositivo) : ''}
                                             </div>
-                                            ${pf.cliente_id ? `
-                                                <div class="slot-device-info-row">
-                                                    ${this.getDeviceBadgeHTML(pf.dispositivo)}
-                                                    ${pf.ip_mac ? `
-                                                        <div class="slot-device-mac" title="Dirección MAC / IP del dispositivo">
-                                                            <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
-                                                            <span>MAC/IP: <strong>${pf.ip_mac}</strong></span>
-                                                        </div>
-                                                    ` : ''}
+                                            <div class="slot-actions-group">
+                                                ${isOccupied ? `
+                                                    <button type="button" class="btn-slot-circle wa" title="Enviar WhatsApp a ${pf.cliente_nombre || 'Cliente'}" onclick="App.sendWhatsAppCredentialsPerfil(${pf.id})">
+                                                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                                                    </button>
+                                                    <button type="button" class="btn-slot-circle del" title="Liberar este perfil" onclick="App.liberarPerfil(${pf.id})">
+                                                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                                    </button>
+                                                ` : `
+                                                    <button type="button" class="btn-slot-assign-pill" onclick="App.openAssignModal(${pf.id})" title="Asignar este perfil a un cliente">
+                                                        <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                                        <span>Asignar</span>
+                                                    </button>
+                                                `}
+                                            </div>
+                                        </div>
+
+                                        <!-- Línea 2: Cliente / Estado + Fechas y Vencimiento -->
+                                        <div class="slot-item-details">
+                                            ${isOccupied ? `
+                                                <div class="slot-user-row truncate">
+                                                    <span class="slot-user-name truncate">
+                                                        👤 <strong>${pf.cliente_nombre || 'Cliente'}</strong>
+                                                    </span>
+                                                    ${pf.ip_mac ? `<span class="slot-mac-chip truncate" title="${pf.ip_mac}">MAC: ${pf.ip_mac}</span>` : ''}
                                                 </div>
-                                            ` : ''}
-                                            ${pf.cliente_id ? profileDateInfo : `
-                                                <div class="slot-available-info">
-                                                    <span class="badge-account-vigencia">Vigencia cuenta: <strong>${diffDays > 0 ? `${diffDays} días` : 'Vencida'}</strong> (hasta ${c.fecha_vencimiento})</span>
+                                                <div class="slot-meta-row">
+                                                    <span class="slot-due-pill ${diffDaysPf !== null && diffDaysPf <= 3 ? 'warn' : ''}">
+                                                        ⏳ ${pf.fecha_vencimiento ? pf.fecha_vencimiento.substring(5) : '—'} 
+                                                        ${diffDaysPf !== null ? `<span class="slot-days-sub">(${diffDaysPf >= 0 ? `${diffDaysPf}d` : `vencido`})</span>` : ''}
+                                                    </span>
+                                                </div>
+                                            ` : `
+                                                <div class="slot-free-row">
+                                                    <span class="slot-free-label">✨ Disponible para venta</span>
+                                                    <span class="slot-vigencia-pill">Vigencia cuenta: <strong>${diffDays > 0 ? `${diffDays}d` : 'Vencida'}</strong></span>
                                                 </div>
                                             `}
-                                            ${conflictTag}
                                         </div>
+
+                                        <!-- Línea 3: Alerta Compacta de Desfase de Vencimiento -->
+                                        ${isConflict ? `
+                                            <div class="slot-conflict-strip" title="La cuenta maestra vence ${diffConflict} días antes de lo contratado por el cliente">
+                                                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                                <span>Cuenta vence <strong>${diffConflict}d antes</strong> que cliente</span>
+                                            </div>
+                                        ` : ''}
                                     </div>
-                                    <div class="profile-slot-actions">
-                                        ${pf.cliente_id ? `
-                                            <button class="btn-slot-action wa" title="Enviar datos por WhatsApp" onclick="App.sendWhatsAppCredentialsPerfil(${pf.id})">
-                                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-                                            </button>
-                                            <button class="btn-slot-action" title="Liberar Perfil" onclick="App.liberarPerfil(${pf.id})">
-                                                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                                            </button>
-                                        ` : `
-                                            <button class="btn-slot-action" style="background:rgba(14,165,233,0.15); color:#38bdf8; border-color:rgba(14,165,233,0.3);" onclick="App.openAssignModal(${pf.id})">
-                                                Asignar
-                                            </button>
-                                        `}
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
+                                `;
+                            }).join('')}
+                        </div>
                     </div>
                 `}
 
                 <!-- Botones de Acción de la Cuenta -->
                 <div class="card-bottom-bar">
-                    <button class="btn-card-act renew" onclick="App.renovarCuenta(${c.id})">
+                    <button type="button" class="btn-card-act renew" onclick="App.renovarCuenta(${c.id})" title="Extender vigencia 30 días">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-                        Renovar +30d
+                        <span>Renovar +30d</span>
                     </button>
-                    <button class="btn-card-act" onclick="App.openEditAccountModal(${c.id})">
+                    <button type="button" class="btn-card-act" onclick="App.openEditAccountModal(${c.id})" title="Editar datos de cuenta">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                        Editar
+                        <span>Editar</span>
                     </button>
-                    <button class="btn-card-act" style="color:#f87171;" onclick="App.eliminarCuenta(${c.id})">
+                    <button type="button" class="btn-card-act danger" onclick="App.eliminarCuenta(${c.id})" title="Eliminar cuenta">
                         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                     </button>
                 </div>
@@ -842,13 +961,19 @@ const App = {
     // -------------------------------------------------------------
     // RENDER: PERFILES (TABLA EN DESKTOP / CARDS EN MÓVIL)
     // -------------------------------------------------------------
-    renderPerfiles() {
-        const tbody = document.getElementById('perfiles-table-body');
-        if (!tbody) return;
-
-        let filtered = this.state.perfiles.filter(p => {
+    getFilteredPerfiles() {
+        return this.state.perfiles.filter(p => {
             if (this.state.filtros.plataforma_id > 0 && parseInt(p.plataforma_id) !== this.state.filtros.plataforma_id) return false;
-            if (this.state.filtros.estado !== 'todas' && p.estado !== this.state.filtros.estado) return false;
+            
+            if (this.state.filtros.estado === 'archivado') {
+                if (p.estado !== 'archivado') return false;
+            } else if (this.state.filtros.estado === 'todas') {
+                // En vista "todas", excluir los archivados para mantener limpia la lista de perfiles de trabajo activo
+                if (p.estado === 'archivado') return false;
+            } else if (p.estado !== this.state.filtros.estado) {
+                return false;
+            }
+
             if (this.state.filtros.search) {
                 const s = this.state.filtros.search.toLowerCase();
                 const matchName = p.nombre_perfil?.toLowerCase().includes(s);
@@ -862,11 +987,18 @@ const App = {
             }
             return true;
         });
+    },
+
+    renderPerfiles() {
+        const tbody = document.getElementById('perfiles-table-body');
+        if (!tbody) return;
+
+        const filtered = this.getFilteredPerfiles();
 
         if (filtered.length === 0) {
             tbody.innerHTML = `
                 <tr class="empty-row-card">
-                    <td colspan="6">
+                    <td colspan="7">
                         <div class="empty-state-box">
                             <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:12px; opacity:0.6;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                             <div style="font-weight:700; color:#fff; font-size:1.05rem;">No se encontraron perfiles o pantallas</div>
@@ -875,6 +1007,7 @@ const App = {
                     </td>
                 </tr>
             `;
+            this.updateBulkPerfilesBar();
             return;
         }
 
@@ -882,9 +1015,11 @@ const App = {
         today.setHours(0, 0, 0, 0);
 
         tbody.innerHTML = filtered.map(p => {
+            const isChecked = this.state.selectedPerfiles.has(parseInt(p.id));
+
             // Calcular días restantes de vencimiento si tiene fecha asignada
             let daysBadge = '';
-            if (p.fecha_vencimiento) {
+            if (p.fecha_vencimiento && p.estado !== 'archivado') {
                 const parts = p.fecha_vencimiento.split('-');
                 const vencDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
                 const diffDays = Math.round((vencDate - today) / (1000 * 60 * 60 * 24));
@@ -895,10 +1030,20 @@ const App = {
                 } else {
                     daysBadge = `<span class="days-pill good">${diffDays}d restantes</span>`;
                 }
+            } else if (p.estado === 'archivado') {
+                daysBadge = `<span class="days-pill" style="background:rgba(148,163,184,0.15); color:#94a3b8; border:1px solid rgba(148,163,184,0.3);">Archivado</span>`;
             }
 
             return `
-                <tr class="profile-table-row">
+                <tr class="profile-table-row ${isChecked ? 'is-selected' : ''}" data-profile-id="${p.id}">
+                    <!-- Checkbox de selección masiva -->
+                    <td class="td-checkbox" data-label="Seleccionar">
+                        <label class="custom-chk-table" title="Seleccionar perfil #${p.numero_perfil}">
+                            <input type="checkbox" class="check-perfil" value="${p.id}" ${isChecked ? 'checked' : ''} onchange="App.handleTogglePerfilCheck(${p.id}, this.checked)">
+                            <span class="chk-box"></span>
+                        </label>
+                    </td>
+
                     <!-- Cabecera del Perfil (En móvil es la cabecera superior del Card) -->
                     <td data-label="Perfil" class="td-profile-header">
                         <div class="profile-info-cell">
@@ -960,7 +1105,7 @@ const App = {
                                 <span class="due-date">⏳ Vence: <strong>${p.fecha_vencimiento || '—'}</strong></span>
                                 ${daysBadge}
                             </div>
-                            ${(p.cuenta_vencimiento && p.fecha_vencimiento && p.cuenta_vencimiento < p.fecha_vencimiento) ? `
+                            ${(p.cuenta_vencimiento && p.fecha_vencimiento && p.cuenta_vencimiento < p.fecha_vencimiento && p.estado !== 'archivado') ? `
                                 <div class="slot-conflict-tag mini" title="¡Conflicto! La cuenta principal vence el ${p.cuenta_vencimiento} antes de la fecha contratada por el cliente">
                                     <span>⚠️ Cuenta vence antes (${p.cuenta_vencimiento})</span>
                                 </div>
@@ -978,7 +1123,18 @@ const App = {
                     <!-- Acciones Rápidas (Pie de Card en móvil) -->
                     <td data-label="Acciones" class="td-actions">
                         <div class="actions-cell-content">
-                            ${p.cliente_id ? `
+                            ${p.estado === 'archivado' ? `
+                                <button class="btn-slot-action" title="Desarchivar este perfil" onclick="App.desarchivarPerfil(${p.id})">
+                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+                                    <span class="mobile-action-text">Desarchivar</span>
+                                </button>
+                                ${p.cliente_id ? `
+                                    <button class="btn-slot-action liberate-btn" title="Liberar Perfil" onclick="App.liberarPerfil(${p.id})">
+                                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                        <span class="mobile-action-text">Liberar</span>
+                                    </button>
+                                ` : ''}
+                            ` : p.cliente_id ? `
                                 <button class="btn-slot-action wa" title="Enviar WhatsApp" onclick="App.sendWhatsAppCredentialsPerfil(${p.id})">
                                     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
                                     <span class="mobile-action-text">WhatsApp</span>
@@ -1002,6 +1158,279 @@ const App = {
                 </tr>
             `;
         }).join('');
+
+        this.updateBulkPerfilesBar();
+    },
+
+    // -------------------------------------------------------------
+    // ACCIONES MASIVAS: PERFILES Y PANTALLAS
+    // -------------------------------------------------------------
+    handleTogglePerfilCheck(id, isChecked) {
+        id = parseInt(id);
+        if (isChecked) {
+            this.state.selectedPerfiles.add(id);
+        } else {
+            this.state.selectedPerfiles.delete(id);
+        }
+        const row = document.querySelector(`.profile-table-row[data-profile-id="${id}"]`);
+        if (row) {
+            row.classList.toggle('is-selected', isChecked);
+        }
+        this.updateBulkPerfilesBar();
+    },
+
+    toggleSelectAllPerfiles(checked) {
+        const visible = this.getFilteredPerfiles();
+        if (checked) {
+            visible.forEach(p => this.state.selectedPerfiles.add(parseInt(p.id)));
+        } else {
+            visible.forEach(p => this.state.selectedPerfiles.delete(parseInt(p.id)));
+        }
+        this.renderPerfiles();
+    },
+
+    clearSelectedPerfiles() {
+        this.state.selectedPerfiles.clear();
+        this.renderPerfiles();
+    },
+
+    updateBulkPerfilesBar() {
+        const bar = document.getElementById('perfiles-bulk-bar');
+        const countEl = document.getElementById('bulk-selected-count');
+        const archiveText = document.getElementById('bulk-archive-text');
+        const checkAll = document.getElementById('check-all-perfiles');
+        const selectedCount = this.state.selectedPerfiles.size;
+
+        if (countEl) countEl.textContent = selectedCount;
+
+        // Actualizar estado del checkbox principal de cabecera
+        if (checkAll) {
+            const visible = this.getFilteredPerfiles();
+            const visibleSelectedCount = visible.filter(p => this.state.selectedPerfiles.has(parseInt(p.id))).length;
+            if (visible.length === 0 || visibleSelectedCount === 0) {
+                checkAll.checked = false;
+                checkAll.indeterminate = false;
+            } else if (visibleSelectedCount === visible.length) {
+                checkAll.checked = true;
+                checkAll.indeterminate = false;
+            } else {
+                checkAll.checked = false;
+                checkAll.indeterminate = true;
+            }
+        }
+
+        if (!bar) return;
+
+        if (selectedCount > 0 && this.state.currentView === 'perfiles') {
+            bar.classList.remove('hidden');
+
+            // Si todos los seleccionados están archivados, cambiar texto a Desarchivar
+            const allArchived = Array.from(this.state.selectedPerfiles).every(id => {
+                const p = this.state.perfiles.find(item => item.id == id);
+                return p && p.estado === 'archivado';
+            });
+
+            if (archiveText) {
+                archiveText.textContent = allArchived ? 'Desarchivar' : 'Archivar';
+            }
+
+            // Permisos de usuario
+            const btnDelete = document.getElementById('btn-bulk-delete');
+            if (btnDelete) btnDelete.style.display = this.can('perfiles', 'eliminar') ? '' : 'none';
+
+            const btnEdit = document.getElementById('btn-bulk-edit');
+            if (btnEdit) btnEdit.style.display = this.can('perfiles', 'editar') ? '' : 'none';
+
+            const btnArchive = document.getElementById('btn-bulk-archive');
+            if (btnArchive) btnArchive.style.display = this.can('perfiles', 'editar') ? '' : 'none';
+        } else {
+            bar.classList.add('hidden');
+        }
+    },
+
+    async handleBulkDeletePerfiles() {
+        if (!this.can('perfiles', 'eliminar')) {
+            API.showToast('No tienes permiso para eliminar perfiles', 'warning');
+            return;
+        }
+        const count = this.state.selectedPerfiles.size;
+        if (count === 0) return;
+
+        if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente los ${count} perfiles seleccionados?\n\nEsta acción no se puede deshacer.`)) {
+            return;
+        }
+
+        const ids = Array.from(this.state.selectedPerfiles);
+        try {
+            const res = await API.post('perfiles.php?action=bulk_delete', { ids });
+            API.showToast(res.message || 'Perfiles eliminados correctamente', 'info');
+            this.state.selectedPerfiles.clear();
+            await this.loadAllData();
+        } catch (error) {
+            API.showToast(error.message, 'error');
+        }
+    },
+
+    async handleBulkArchivePerfiles() {
+        if (!this.can('perfiles', 'editar')) {
+            API.showToast('No tienes permiso para editar perfiles', 'warning');
+            return;
+        }
+        const count = this.state.selectedPerfiles.size;
+        if (count === 0) return;
+
+        const allArchived = Array.from(this.state.selectedPerfiles).every(id => {
+            const p = this.state.perfiles.find(item => item.id == id);
+            return p && p.estado === 'archivado';
+        });
+
+        const actionText = allArchived ? 'desarchivar' : 'archivar';
+        if (!confirm(`¿Deseas ${actionText} los ${count} perfiles seleccionados?`)) {
+            return;
+        }
+
+        const ids = Array.from(this.state.selectedPerfiles);
+        try {
+            const res = await API.post('perfiles.php?action=bulk_archive', {
+                ids,
+                archivar: !allArchived
+            });
+            API.showToast(res.message || `Perfiles ${allArchived ? 'desarchivados' : 'archivados'} exitosamente`, 'success');
+            this.state.selectedPerfiles.clear();
+            await this.loadAllData();
+        } catch (error) {
+            API.showToast(error.message, 'error');
+        }
+    },
+
+    async desarchivarPerfil(perfilId) {
+        try {
+            const res = await API.post('perfiles.php?action=bulk_archive', {
+                ids: [perfilId],
+                archivar: false
+            });
+            API.showToast(res.message || 'Perfil desarchivado y restaurado', 'success');
+            await this.loadAllData();
+        } catch (error) {
+            API.showToast(error.message, 'error');
+        }
+    },
+
+    openBulkEditPerfilesModal() {
+        if (!this.can('perfiles', 'editar')) {
+            API.showToast('No tienes permiso para editar perfiles', 'warning');
+            return;
+        }
+        const count = this.state.selectedPerfiles.size;
+        if (count === 0) return;
+
+        const countEl = document.getElementById('bulk-edit-count');
+        if (countEl) countEl.textContent = count;
+
+        const form = document.getElementById('form-bulk-edit-perfiles');
+        if (form) form.reset();
+
+        ['precio', 'pin', 'dispositivo', 'venc', 'notas'].forEach(field => {
+            const grp = document.getElementById(`bulk-group-${field}`);
+            const chk = document.getElementById(`bulk-chk-${field}`);
+            if (grp) grp.style.display = 'none';
+            if (chk) {
+                chk.checked = false;
+                const card = chk.closest('.bulk-field-card');
+                if (card) card.classList.remove('active');
+            }
+        });
+
+        const boxDias = document.getElementById('bulk-box-dias');
+        const boxFecha = document.getElementById('bulk-box-fecha');
+        if (boxDias) boxDias.style.display = 'block';
+        if (boxFecha) boxFecha.style.display = 'none';
+
+        this.openModal('modal-bulk-edit-perfiles');
+    },
+
+    async handleSaveBulkEditPerfiles(e) {
+        e.preventDefault();
+        if (this._isSavingBulkEdit) return;
+
+        const count = this.state.selectedPerfiles.size;
+        if (count === 0) {
+            API.showToast('No hay perfiles seleccionados', 'warning');
+            return;
+        }
+
+        const fields = {};
+
+        if (document.getElementById('bulk-chk-precio')?.checked) {
+            const p = document.getElementById('bulk-val-precio')?.value;
+            if (p === '' || isNaN(parseFloat(p))) {
+                API.showToast('Ingresa un precio mensual válido', 'warning');
+                return;
+            }
+            fields.precio_mensual = parseFloat(p);
+        }
+
+        if (document.getElementById('bulk-chk-pin')?.checked) {
+            fields.pin_perfil = document.getElementById('bulk-val-pin')?.value.trim();
+        }
+
+        if (document.getElementById('bulk-chk-dispositivo')?.checked) {
+            fields.dispositivo = document.getElementById('bulk-val-dispositivo')?.value;
+        }
+
+        if (document.getElementById('bulk-chk-venc')?.checked) {
+            const mode = document.querySelector('input[name="bulk_venc_mode"]:checked')?.value || 'dias';
+            if (mode === 'dias') {
+                const d = parseInt(document.getElementById('bulk-val-dias')?.value);
+                if (!d || d < 1) {
+                    API.showToast('Ingresa los días a extender válidos', 'warning');
+                    return;
+                }
+                fields.dias_adicionales = d;
+            } else {
+                const f = document.getElementById('bulk-val-fecha')?.value;
+                if (!f) {
+                    API.showToast('Selecciona una fecha de vencimiento fija', 'warning');
+                    return;
+                }
+                fields.fecha_vencimiento = f;
+            }
+        }
+
+        if (document.getElementById('bulk-chk-notas')?.checked) {
+            fields.notas = document.getElementById('bulk-val-notas')?.value.trim();
+        }
+
+        if (Object.keys(fields).length === 0) {
+            API.showToast('Marca al menos una casilla para indicar qué campo deseas cambiar', 'warning');
+            return;
+        }
+
+        const btnSubmit = document.getElementById('btn-submit-bulk-edit');
+        const origText = btnSubmit ? btnSubmit.innerHTML : 'Aplicar Cambios';
+
+        this._isSavingBulkEdit = true;
+        if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = `<span class="spinner" style="width:14px; height:14px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; display:inline-block; animation:spin 0.8s linear infinite; margin-right:6px;"></span> Aplicando...`;
+        }
+
+        try {
+            const ids = Array.from(this.state.selectedPerfiles);
+            const res = await API.post('perfiles.php?action=bulk_edit', { ids, fields });
+            API.showToast(res.message || 'Perfiles actualizados exitosamente', 'success');
+            this.closeModal('modal-bulk-edit-perfiles');
+            this.state.selectedPerfiles.clear();
+            await this.loadAllData();
+        } catch (error) {
+            API.showToast(error.message, 'error');
+        } finally {
+            this._isSavingBulkEdit = false;
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = origText;
+            }
+        }
     },
 
     // -------------------------------------------------------------
@@ -1212,7 +1641,7 @@ const App = {
     // WHATSAPP MESSAGING ENGINES
     // -------------------------------------------------------------
     sendWhatsAppCredentialsPerfil(perfilId) {
-        const pf = this.state.perfiles.find(p => p.id === perfilId);
+        const pf = this.state.perfiles.find(p => p.id == perfilId);
         if (!pf || !pf.cliente_telefono) {
             API.showToast('Este perfil no tiene un cliente con teléfono asignado.', 'warning');
             return;
@@ -1244,7 +1673,7 @@ ${pf.ip_mac ? `🌐 *Identificador / MAC-IP:* ${pf.ip_mac}\n` : ''}📅 *Vencimi
     },
 
     sendWhatsAppCredentialsCuenta(cuentaId) {
-        const c = this.state.cuentas.find(item => item.id === cuentaId);
+        const c = this.state.cuentas.find(item => item.id == cuentaId);
         if (!c || !c.cliente_completo_telefono) {
             API.showToast('Esta cuenta no tiene cliente con teléfono asignado.', 'warning');
             return;
@@ -1271,9 +1700,9 @@ ${c.pin_maestro ? `🔒 *PIN Maestro:* ${c.pin_maestro}\n` : ''}📅 *Vence:* ${
     sendWhatsAppReminder(itemId, tipo) {
         let item = null;
         if (tipo === 'perfil') {
-            item = this.state.perfiles.find(p => p.id === itemId);
+            item = this.state.perfiles.find(p => p.id == itemId);
         } else {
-            item = this.state.cuentas.find(c => c.id === itemId);
+            item = this.state.cuentas.find(c => c.id == itemId);
         }
 
         const phone = tipo === 'perfil' ? item?.cliente_telefono : item?.cliente_completo_telefono;
@@ -1370,7 +1799,7 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
     },
 
     openEditAccountModal(cuentaId) {
-        const c = this.state.cuentas.find(item => item.id === cuentaId);
+        const c = this.state.cuentas.find(item => item.id == cuentaId);
         if (!c) return;
 
         this.openAccountModal();
@@ -1394,18 +1823,68 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
         if (c.cliente_id) document.getElementById('cuenta-cliente').value = c.cliente_id;
     },
 
+    useMasterAccountPin() {
+        const c = this.state._assigningCuenta;
+        const pf = this.state._assigningPerfil;
+        const masterPin = c?.pin_maestro || pf?.cuenta_pin_maestro || '';
+        if (!masterPin) {
+            this.showToast('Esta cuenta principal no tiene PIN maestro configurado', 'warning');
+            return;
+        }
+        const pinInput = document.getElementById('assign-perfil-pin');
+        if (pinInput) {
+            pinInput.value = masterPin;
+            pinInput.focus();
+            this.showToast(`PIN maestro "${masterPin}" aplicado al perfil`, 'success');
+        }
+    },
+
     openAssignModal(perfilId) {
-        const pf = this.state.perfiles.find(p => p.id === perfilId);
-        if (!pf) return;
+        if (!perfilId) {
+            API.showToast('ID de perfil inválido', 'error');
+            return;
+        }
+
+        // Buscar en this.state.perfiles con comparación flexible
+        let pf = (this.state.perfiles || []).find(p => p.id == perfilId);
+
+        // Si no se encuentra en la lista general de perfiles, buscar en las cuentas cargadas
+        if (!pf && this.state.cuentas) {
+            for (const acc of this.state.cuentas) {
+                if (acc.perfiles && Array.isArray(acc.perfiles)) {
+                    const found = acc.perfiles.find(p => p.id == perfilId);
+                    if (found) {
+                        pf = {
+                            ...found,
+                            cuenta_id: found.cuenta_id || acc.id,
+                            cuenta_correo: acc.correo,
+                            cuenta_pin_maestro: acc.pin_maestro,
+                            cuenta_vencimiento: acc.fecha_vencimiento,
+                            plataforma_id: acc.plataforma_id,
+                            plataforma_nombre: acc.plataforma_nombre,
+                            color_hex: acc.color_hex
+                        };
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!pf) {
+            console.error('Perfil no encontrado para ID:', perfilId, this.state.perfiles);
+            API.showToast('No se encontró el perfil seleccionado en memoria.', 'error');
+            return;
+        }
 
         // Cuenta a la que pertenece el perfil
-        const c = this.state.cuentas.find(item => item.id === pf.cuenta_id) || {
+        const c = (this.state.cuentas || []).find(item => item.id == pf.cuenta_id) || {
             id: pf.cuenta_id,
             plataforma_id: pf.plataforma_id,
             plataforma_nombre: pf.plataforma_nombre,
             color_hex: pf.color_hex,
             correo: pf.cuenta_correo,
-            fecha_vencimiento: pf.cuenta_vencimiento
+            fecha_vencimiento: pf.cuenta_vencimiento,
+            pin_maestro: pf.cuenta_pin_maestro || ''
         };
         this.state._assigningCuenta = c;
         this.state._assigningPerfil = pf;
@@ -1415,11 +1894,26 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
         if (form) form.reset();
 
         document.getElementById('assign-perfil-id').value = pf.id;
-        document.getElementById('assign-perfil-nombre').value = pf.nombre_perfil;
+        document.getElementById('assign-perfil-nombre').value = pf.nombre_perfil || '';
         document.getElementById('assign-perfil-pin').value = pf.pin_perfil || '0000';
         document.getElementById('assign-ip-mac').value = pf.ip_mac || '';
         document.getElementById('assign-precio').value = (parseFloat(pf.precio_mensual) || 12.00).toFixed(2);
         document.getElementById('assign-notas').value = pf.notas || '';
+
+        // Configurar botón "Usar PIN Cuenta Principal"
+        const masterPin = c.pin_maestro || pf.cuenta_pin_maestro || '';
+        const btnMasterPin = document.getElementById('btn-use-master-pin');
+        const labelMasterPin = document.getElementById('label-use-master-pin-text');
+        if (btnMasterPin && labelMasterPin) {
+            if (masterPin) {
+                labelMasterPin.textContent = `Usar PIN Cuenta (${masterPin})`;
+                btnMasterPin.style.display = 'inline-flex';
+                btnMasterPin.title = `Aplicar PIN maestro "${masterPin}" de la cuenta`;
+            } else {
+                labelMasterPin.textContent = `Sin PIN en cuenta`;
+                btnMasterPin.style.display = 'none';
+            }
+        }
 
         // Seleccionar dispositivo
         this.selectDeviceType(pf.dispositivo || 'tv');
@@ -1432,9 +1926,23 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
             cliSelect.innerHTML = `
                 <option value="">-- Seleccionar Cliente Existente --</option>
                 <option value="new">+ Crear Nuevo Cliente Rápido...</option>
-            ` + this.state.clientes.map(cl => `
-                <option value="${cl.id}">${cl.nombre} (${cl.telefono})</option>
+            ` + (this.state.clientes || []).map(cl => `
+                <option value="${cl.id}">${this.escapeHtml(cl.nombre)} (${this.escapeHtml(cl.telefono || 'Sin WhatsApp')})</option>
             `).join('');
+            cliSelect.value = '';
+        }
+
+        const quickFields = document.getElementById('new-client-quick-fields');
+        if (quickFields) quickFields.style.display = 'none';
+        const newCliNombre = document.getElementById('new-cli-nombre');
+        const newCliTel = document.getElementById('new-cli-telefono');
+        if (newCliNombre) {
+            newCliNombre.value = '';
+            newCliNombre.required = false;
+        }
+        if (newCliTel) {
+            newCliTel.value = '';
+            newCliTel.required = false;
         }
 
         const todayStr = new Date().toISOString().split('T')[0];
@@ -1442,7 +1950,6 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
 
         const nextMonth = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
         document.getElementById('assign-fecha-venc').value = nextMonth;
-        document.getElementById('new-client-quick-fields').style.display = 'none';
 
         // Actualizar texto del botón de vencimiento de cuenta
         const btnChipDue = document.getElementById('btn-chip-account-due');
@@ -1639,7 +2146,7 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
             if (res.nueva_fecha) {
                 c.fecha_vencimiento = res.nueva_fecha;
             }
-            const foundAcc = this.state.cuentas.find(item => item.id === c.id);
+            const foundAcc = this.state.cuentas.find(item => item.id == c.id);
             if (foundAcc && res.nueva_fecha) {
                 foundAcc.fecha_vencimiento = res.nueva_fecha;
             }
@@ -1685,7 +2192,7 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
     },
 
     openEditClientModal(clientId) {
-        const cl = this.state.clientes.find(item => item.id === clientId);
+        const cl = this.state.clientes.find(item => item.id == clientId);
         if (!cl) return;
 
         this.openClientModal();
@@ -1720,6 +2227,8 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
     // -------------------------------------------------------------
     async handleSaveAccount(e) {
         e.preventDefault();
+        if (this._isSavingAccount) return;
+
         const id = document.getElementById('cuenta-id').value;
         const data = {
             plataforma_id: document.getElementById('cuenta-plataforma').value,
@@ -1737,6 +2246,15 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
             notas: document.getElementById('cuenta-notas').value.trim()
         };
 
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const origBtnText = submitBtn ? submitBtn.innerHTML : 'Guardar Cuenta';
+
+        this._isSavingAccount = true;
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span class="spinner" style="width:14px; height:14px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; display:inline-block; animation:spin 0.8s linear infinite; margin-right:6px; vertical-align:middle;"></span> Guardando...`;
+        }
+
         try {
             if (id) {
                 await API.put(`cuentas.php?id=${id}`, data);
@@ -1749,11 +2267,19 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
             await this.loadAllData();
         } catch (error) {
             API.showToast(error.message, 'error');
+        } finally {
+            this._isSavingAccount = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = origBtnText;
+            }
         }
     },
 
     async handleSaveAssignProfile(e) {
         e.preventDefault();
+        if (this._isSavingAssign) return;
+
         const perfilId = document.getElementById('assign-perfil-id').value;
         const clienteSelect = document.getElementById('assign-cliente-id').value;
 
@@ -1773,15 +2299,26 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
             data.nuevo_cliente_nombre = document.getElementById('new-cli-nombre').value.trim();
             data.nuevo_cliente_telefono = document.getElementById('new-cli-telefono').value.trim();
             if (!data.nuevo_cliente_nombre || !data.nuevo_cliente_telefono) {
-                API.showToast('Ingresa nombre y teléfono del nuevo cliente', 'warning');
+                API.showToast('Ingresa nombre y WhatsApp del nuevo cliente', 'warning');
+                document.getElementById('new-cli-nombre')?.focus();
                 return;
             }
         } else {
             data.cliente_id = clienteSelect;
             if (!data.cliente_id) {
                 API.showToast('Selecciona un cliente para asignar el perfil', 'warning');
+                document.getElementById('assign-cliente-id')?.focus();
                 return;
             }
+        }
+
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const origBtnText = submitBtn ? submitBtn.innerHTML : 'Guardar Asignación';
+
+        this._isSavingAssign = true;
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span class="spinner" style="width:14px; height:14px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; display:inline-block; animation:spin 0.8s linear infinite; margin-right:6px; vertical-align:middle;"></span> Asignando...`;
         }
 
         try {
@@ -1796,11 +2333,19 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
             }
         } catch (error) {
             API.showToast(error.message, 'error');
+        } finally {
+            this._isSavingAssign = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = origBtnText;
+            }
         }
     },
 
     async handleSaveClient(e) {
         e.preventDefault();
+        if (this._isSavingClient) return;
+
         const id = document.getElementById('cliente-id').value;
         const data = {
             nombre: document.getElementById('cliente-nombre').value.trim(),
@@ -1808,6 +2353,15 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
             email: document.getElementById('cliente-email').value.trim(),
             notas: document.getElementById('cliente-notas').value.trim()
         };
+
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const origBtnText = submitBtn ? submitBtn.innerHTML : 'Guardar Cliente';
+
+        this._isSavingClient = true;
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span class="spinner" style="width:14px; height:14px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; display:inline-block; animation:spin 0.8s linear infinite; margin-right:6px; vertical-align:middle;"></span> Guardando...`;
+        }
 
         try {
             if (id) {
@@ -1821,6 +2375,12 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
             await this.loadAllData();
         } catch (error) {
             API.showToast(error.message, 'error');
+        } finally {
+            this._isSavingClient = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = origBtnText;
+            }
         }
     },
 
@@ -1918,6 +2478,8 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
 
     async handleSavePlatform(e) {
         e.preventDefault();
+        if (this._isSavingPlatform) return;
+
         const id = document.getElementById('plataforma-id').value;
         const data = {
             nombre: document.getElementById('plataforma-nombre').value.trim(),
@@ -1929,6 +2491,15 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
         if (!data.nombre) {
             API.showToast('El nombre de la plataforma es obligatorio', 'warning');
             return;
+        }
+
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const origBtnText = submitBtn ? submitBtn.innerHTML : 'Guardar Plataforma';
+
+        this._isSavingPlatform = true;
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span class="spinner" style="width:14px; height:14px; border:2px solid #fff; border-top-color:transparent; border-radius:50%; display:inline-block; animation:spin 0.8s linear infinite; margin-right:6px; vertical-align:middle;"></span> Guardando...`;
         }
 
         try {
@@ -1943,6 +2514,12 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
             await this.loadAllData();
         } catch (error) {
             API.showToast(error.message, 'error');
+        } finally {
+            this._isSavingPlatform = false;
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = origBtnText;
+            }
         }
     },
 

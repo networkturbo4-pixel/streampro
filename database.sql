@@ -1,13 +1,16 @@
 -- =====================================================
 -- SISTEMA DE ADMINISTRACIÓN DE CUENTAS DE STREAMING
--- Base de Datos: MySQL / MariaDB (XAMPP)
+-- Base de Datos: MySQL / MariaDB (Compatible con cPanel / XAMPP)
+-- =====================================================
+-- NOTA IMPORTANTE PARA CPANEL / HOSTING:
+-- 1. Crea primero la base de datos en cPanel (ej. usuariocpanel_stream).
+-- 2. Entra a phpMyAdmin, selecciona dicha base de datos en el menú izquierdo.
+-- 3. Ve a la pestaña "Importar", selecciona este archivo y haz clic en "Continuar".
 -- =====================================================
 
-CREATE DATABASE IF NOT EXISTS `stream_manager` 
-CHARACTER SET utf8mb4 
-COLLATE utf8mb4_unicode_ci;
-
-USE `stream_manager`;
+-- En servidor local XAMPP puedes descomentar estas dos líneas si no has creado la BD aún:
+-- CREATE DATABASE IF NOT EXISTS `stream_manager` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- USE `stream_manager`;
 
 -- 1. TABLA DE ADMINISTRADORES Y USUARIOS
 CREATE TABLE IF NOT EXISTS `administradores` (
@@ -82,7 +85,7 @@ CREATE TABLE IF NOT EXISTS `perfiles` (
     `precio_mensual` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     `fecha_inicio` DATE NULL,
     `fecha_vencimiento` DATE NULL,
-    `estado` ENUM('disponible', 'ocupado', 'por_vencer', 'vencido') NOT NULL DEFAULT 'disponible',
+    `estado` ENUM('disponible', 'ocupado', 'por_vencer', 'vencido', 'archivado') NOT NULL DEFAULT 'disponible',
     `notas` TEXT NULL,
     `creado_en` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT `fk_perfiles_cuenta` FOREIGN KEY (`cuenta_id`) REFERENCES `cuentas`(`id`) ON DELETE CASCADE,
@@ -193,3 +196,35 @@ INSERT INTO `perfiles` (`id`, `cuenta_id`, `numero_perfil`, `nombre_perfil`, `pi
 (13, 4, 4, 'Max 4 - Disponible', '0000', NULL, 10.00, NULL, NULL, 'disponible', 'Libre'),
 (14, 4, 5, 'Max 5 - Disponible', '0000', NULL, 10.00, NULL, NULL, 'disponible', 'Libre')
 ON DUPLICATE KEY UPDATE `nombre_perfil` = VALUES(`nombre_perfil`);
+
+-- Inserción de Roles por Defecto
+INSERT INTO `roles` (`id`, `nombre`, `descripcion`, `permisos`, `es_sistema`) VALUES
+(1, 'Super Administrador', 'Control total y absoluto sobre todos los módulos, usuarios, finanzas y actualizaciones.', 
+'{"dashboard":{"ver":true},"cuentas":{"ver":true,"crear":true,"editar":true,"eliminar":true},"perfiles":{"ver":true,"crear":true,"editar":true,"eliminar":true},"clientes":{"ver":true,"crear":true,"editar":true,"eliminar":true},"plataformas":{"ver":true,"crear":true,"editar":true,"eliminar":true},"alertas":{"ver":true},"configuracion":{"ver":true,"usuarios":true,"roles":true,"ajustes":true,"actualizaciones":true}}', 1),
+(2, 'Administrador Operativo', 'Gestión completa de cuentas, clientes y usuarios, sin acceso a actualizaciones del sistema.', 
+'{"dashboard":{"ver":true},"cuentas":{"ver":true,"crear":true,"editar":true,"eliminar":true},"perfiles":{"ver":true,"crear":true,"editar":true,"eliminar":true},"clientes":{"ver":true,"crear":true,"editar":true,"eliminar":true},"plataformas":{"ver":true,"crear":true,"editar":true,"eliminar":true},"alertas":{"ver":true},"configuracion":{"ver":true,"usuarios":true,"roles":true,"ajustes":true,"actualizaciones":false}}', 1),
+(3, 'Vendedor / Operador', 'Venta y asignación de perfiles, registro de clientes y visualización de alertas. Sin acceso a ajustes.', 
+'{"dashboard":{"ver":true},"cuentas":{"ver":true,"crear":false,"editar":false,"eliminar":false},"perfiles":{"ver":true,"crear":true,"editar":true,"eliminar":false},"clientes":{"ver":true,"crear":true,"editar":true,"eliminar":false},"plataformas":{"ver":true,"crear":false,"editar":false,"eliminar":false},"alertas":{"ver":true},"configuracion":{"ver":false,"usuarios":false,"roles":false,"ajustes":false,"actualizaciones":false}}', 1),
+(4, 'Soporte y Monitoreo', 'Visualización de datos de clientes, perfiles y cuentas para resolver incidencias de clientes.', 
+'{"dashboard":{"ver":true},"cuentas":{"ver":true,"crear":false,"editar":false,"eliminar":false},"perfiles":{"ver":true,"crear":false,"editar":false,"eliminar":false},"clientes":{"ver":true,"crear":false,"editar":false,"eliminar":false},"plataformas":{"ver":true,"crear":false,"editar":false,"eliminar":false},"alertas":{"ver":true},"configuracion":{"ver":false,"usuarios":false,"roles":false,"ajustes":false,"actualizaciones":false}}', 1)
+ON DUPLICATE KEY UPDATE `nombre` = VALUES(`nombre`);
+
+-- Inserción de Parámetros de Configuración Iniciales
+INSERT INTO `configuracion` (`clave`, `valor`) VALUES
+('empresa_nombre', 'StreamManager Pro'),
+('empresa_telefono', '+51 987 654 321'),
+('empresa_moneda', 'USD'),
+('empresa_simbolo', '$'),
+('dias_alerta_vencimiento', '3'),
+('github_repo', 'networkturbo4-pixel/streampro'),
+('github_branch', 'main'),
+('github_token', ''),
+('sistema_version', '2.7.0'),
+('github_last_commit', '')
+ON DUPLICATE KEY UPDATE `clave` = VALUES(`clave`);
+
+-- Registro de Migración Inicial
+INSERT INTO `sistema_migraciones` (`migracion`) VALUES 
+('001_create_roles_and_config.sql')
+ON DUPLICATE KEY UPDATE `migracion` = VALUES(`migracion`);
+

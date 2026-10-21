@@ -21,12 +21,52 @@ if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
     @session_start();
 }
 
-// Configuración de conexión MySQL
-define('DB_HOST', 'localhost');
-define('DB_PORT', '3306');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'stream_manager');
+// Cargar configuración de base de datos si existe config.php
+if (file_exists(dirname(__DIR__) . '/config.php')) {
+    require_once dirname(__DIR__) . '/config.php';
+} elseif (file_exists(__DIR__ . '/config.php')) {
+    require_once __DIR__ . '/config.php';
+}
+
+// Configuración por defecto (si no fueron definidos en config.php)
+if (!defined('DB_HOST')) define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+if (!defined('DB_PORT')) define('DB_PORT', getenv('DB_PORT') ?: '3306');
+if (!defined('DB_USER')) define('DB_USER', getenv('DB_USER') ?: 'root');
+if (!defined('DB_PASS')) define('DB_PASS', getenv('DB_PASS') !== false ? getenv('DB_PASS') : '');
+if (!defined('DB_NAME')) define('DB_NAME', getenv('DB_NAME') ?: 'stream_manager');
+
+// Manejador global de excepciones para asegurar respuestas JSON claras en lugar de HTTP 500 en blanco
+set_exception_handler(function($e) {
+    $msg = $e->getMessage();
+    if (strpos($msg, "doesn't exist") !== false || strpos($msg, "no existe") !== false || strpos($msg, "Base table or view not found") !== false) {
+        jsonError("Las tablas de la base de datos no existen aún. Abre en tu navegador 'https://tudominio.com/api/setup.php' o importa el archivo 'database.sql' en phpMyAdmin de cPanel.", 500);
+    }
+    jsonError("Error en el servidor (" . $msg . "). Si modificaste 'config.php', verifica que la sintaxis y contraseñas sean correctas.", 500);
+});
+
+function autoInstallTablesIfMissing(PDO $db): void {
+    try {
+        $check = $db->query("SHOW TABLES LIKE 'administradores'")->fetch();
+        if (!$check) {
+            $sqlFile = dirname(__DIR__) . '/database.sql';
+            if (file_exists($sqlFile)) {
+                $sqlContent = file_get_contents($sqlFile);
+                if (!empty($sqlContent)) {
+                    // Remover comentarios para separar sentencias limpias
+                    $cleanSql = preg_replace('/--.*$/m', '', $sqlContent);
+                    $queries = array_filter(array_map('trim', explode(';', $cleanSql)));
+                    foreach ($queries as $query) {
+                        if (!empty($query)) {
+                            $db->exec($query);
+                        }
+                    }
+                }
+            }
+        }
+    } catch (Exception $ex) {
+        error_log("Aviso: Auto-instalación de tablas: " . $ex->getMessage());
+    }
+}
 
 function getDBConnection(): PDO {
     static $pdo = null;
@@ -42,18 +82,21 @@ function getDBConnection(): PDO {
             PDO::ATTR_EMULATE_PREPARES   => false,
         ];
         $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+        
+        // Auto-crear tablas iniciales si la BD está vacía
+        autoInstallTablesIfMissing($pdo);
+        
         runPendingMigrations($pdo);
         return $pdo;
     } catch (PDOException $e) {
-        // Si la base de datos no existe aún, intentar crearla
-        if ($e->getCode() == 1049 || strpos($e->getMessage(), 'Unknown database') !== false) {
+        // En entorno local XAMPP (root sin pass), intentar crear la base de datos si no existe
+        $isLocalhost = in_array(DB_HOST, ['localhost', '127.0.0.1']) && DB_USER === 'root' && empty(DB_PASS);
+        if ($isLocalhost && ($e->getCode() == 1049 || strpos($e->getMessage(), 'Unknown database') !== false)) {
             try {
                 $rootDsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";charset=utf8mb4";
                 $rootPdo = new PDO($rootDsn, DB_USER, DB_PASS);
                 $rootPdo->exec("CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
                 
-                // Reconectar con la BD creada
-                $dsn = "mysql:host=" . DB_HOST . ";port=" . DB_PORT . ";dbname=" . DB_NAME . ";charset=utf8mb4";
                 $pdo = new PDO($dsn, DB_USER, DB_PASS, [
                     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -62,10 +105,19 @@ function getDBConnection(): PDO {
                 runPendingMigrations($pdo);
                 return $pdo;
             } catch (Exception $ex) {
-                jsonError("Error al inicializar la base de datos MySQL: " . $ex->getMessage(), 500);
+                // Continuar hacia el mensaje de error descriptivo
             }
         }
-        jsonError("No se pudo conectar a la base de datos MySQL en XAMPP (" . $e->getMessage() . "). Asegúrate de que MySQL esté iniciado.", 500);
+
+        // Mensajes de error claros orientados a cPanel y producción
+        $msg = $e->getMessage();
+        if ($e->getCode() == 1049 || strpos($msg, 'Unknown database') !== false) {
+            jsonError("La base de datos '" . DB_NAME . "' no existe. En cPanel, créala desde 'Bases de datos MySQL', impórtale 'database.sql' y verifica el nombre en 'config.php'.", 500);
+        } elseif ($e->getCode() == 1045 || strpos($msg, 'Access denied') !== false) {
+            jsonError("Acceso denegado a MySQL. Verifica el usuario (" . DB_USER . ") y la contraseña en 'config.php', y confirma que el usuario tenga privilegios en cPanel.", 500);
+        }
+
+        jsonError("No se pudo conectar a la base de datos MySQL (" . $msg . "). Revisa 'config.php' y el estado del servicio MySQL.", 500);
     }
 }
 
@@ -173,7 +225,8 @@ function syncExpirationStates(PDO $db): void {
                SET estado = 'vencido' 
                WHERE cliente_id IS NOT NULL 
                  AND fecha_vencimiento IS NOT NULL 
-                 AND fecha_vencimiento < CURDATE()");
+                 AND fecha_vencimiento < CURDATE()
+                 AND estado != 'archivado'");
 
     // Marcar perfiles por vencer (en los próximos 3 días)
     $db->exec("UPDATE perfiles 
@@ -181,14 +234,16 @@ function syncExpirationStates(PDO $db): void {
                WHERE cliente_id IS NOT NULL 
                  AND fecha_vencimiento IS NOT NULL 
                  AND fecha_vencimiento >= CURDATE() 
-                 AND fecha_vencimiento <= DATE_ADD(CURDATE(), INTERVAL 3 DAY)");
+                 AND fecha_vencimiento <= DATE_ADD(CURDATE(), INTERVAL 3 DAY)
+                 AND estado != 'archivado'");
 
     // Marcar perfiles ocupados normales
     $db->exec("UPDATE perfiles 
                SET estado = 'ocupado' 
                WHERE cliente_id IS NOT NULL 
                  AND fecha_vencimiento IS NOT NULL 
-                 AND fecha_vencimiento > DATE_ADD(CURDATE(), INTERVAL 3 DAY)");
+                 AND fecha_vencimiento > DATE_ADD(CURDATE(), INTERVAL 3 DAY)
+                 AND estado != 'archivado'");
 }
 
 /**

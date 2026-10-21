@@ -1,13 +1,33 @@
-# StreamManager Pro - PWA Apache Configuration
+# StreamManager Pro - Apache & cPanel Configuration
 
-# 1. Asegurar MIME type correcto para manifest.webmanifest
+# 1. Seguridad Básica y Desactivar Listado de Directorios
+Options -Indexes
+
+# 2. Soporte para Cabecera de Autorización (Vital en cPanel con FastCGI / PHP-FPM)
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+
+# 3. Proteger Archivos Sensibles de Descargas Directas (.sql, .log, .env, git)
+<FilesMatch "(database\.sql|\.sql|\.env|\.git.*|\.log)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# 4. Asegurar MIME type correcto para PWA y Recursos
 <IfModule mod_mime.c>
     AddType application/manifest+json .webmanifest
     AddType application/json .json
     AddType image/svg+xml .svg
 </IfModule>
 
-# 2. Control de Caché para Service Worker (siempre fresco para detectar updates)
+# 5. Control de Caché para Service Worker (siempre fresco para detectar updates)
 <IfModule mod_headers.c>
     <Files "sw.js">
         Header set Service-Worker-Allowed "/"
@@ -21,7 +41,7 @@
     </FilesMatch>
 </IfModule>
 
-# 3. Compresión Gzip (si está habilitado mod_deflate)
+# 6. Compresión Gzip (si está habilitado mod_deflate en el hosting)
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/html text/plain text/css application/json application/javascript text/javascript image/svg+xml application/manifest+json
 </IfModule>

@@ -10,8 +10,9 @@ $error = null;
 
 try {
     require_once __DIR__ . '/db.php';
+    header('Content-Type: text/html; charset=utf-8');
     $db = getDBConnection();
-    $status[] = " Conexión exitosa a MySQL (" . DB_HOST . ":" . DB_PORT . ")";
+    $status[] = "✔ Conexión exitosa a MySQL (" . DB_HOST . ":" . DB_PORT . " - Base de Datos: " . DB_NAME . ")";
 
     // Verificar si se solicita reiniciar o instalar
     if (isset($_GET['install']) || isset($_POST['install'])) {
@@ -19,15 +20,25 @@ try {
         if (!$sql) {
             throw new Exception("No se encontró el archivo database.sql");
         }
-        $db->exec($sql);
-        $status[] = " Base de datos `stream_manager` y tablas instaladas correctamente desde database.sql.";
+        $cleanSql = preg_replace('/--.*$/m', '', $sql);
+        $queries = array_filter(array_map('trim', explode(';', $cleanSql)));
+        foreach ($queries as $q) {
+            if (!empty($q)) {
+                $db->exec($q);
+            }
+        }
+        $status[] = "✔ Tablas y datos iniciales instalados correctamente desde database.sql.";
     }
 
     // Verificar conteos
-    $tablas = ['administradores', 'plataformas', 'cuentas', 'perfiles', 'clientes', 'historial_renovaciones'];
+    $tablas = ['administradores', 'plataformas', 'cuentas', 'perfiles', 'clientes', 'historial_renovaciones', 'roles', 'configuracion'];
     foreach ($tablas as $t) {
-        $res = $db->query("SELECT COUNT(*) as c FROM `$t`")->fetch();
-        $status[] = " Tabla `{$t}`: {$res['c']} registros encontrados.";
+        try {
+            $res = $db->query("SELECT COUNT(*) as c FROM `$t`")->fetch();
+            $status[] = "✔ Tabla `{$t}`: {$res['c']} registros encontrados.";
+        } catch (Exception $te) {
+            $status[] = "⚠ Tabla `{$t}` aún no existe. Importa database.sql en phpMyAdmin.";
+        }
     }
 
 } catch (Exception $e) {

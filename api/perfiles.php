@@ -109,8 +109,14 @@ switch ($method) {
             $dispositivo = in_array($data['dispositivo'] ?? '', ['tv', 'android', 'iphone', 'pc', 'otro']) ? $data['dispositivo'] : 'tv';
             $nombrePerfil = trim($data['nombre_perfil'] ?? '');
             $fechaInicio = !empty($data['fecha_inicio']) ? $data['fecha_inicio'] : date('Y-m-d');
-            $dias = isset($data['dias']) ? intval($data['dias']) : 30;
-            $fechaVencimiento = !empty($data['fecha_vencimiento']) ? $data['fecha_vencimiento'] : date('Y-m-d', strtotime($fechaInicio . " + $dias days"));
+            $fechaVencimiento = !empty($data['fecha_vencimiento']) ? $data['fecha_vencimiento'] : null;
+            if ($fechaVencimiento && !empty($fechaInicio)) {
+                $calcDays = round((strtotime($fechaVencimiento) - strtotime($fechaInicio)) / 86400);
+                $dias = $calcDays > 0 ? $calcDays : 30;
+            } else {
+                $dias = isset($data['dias']) ? intval($data['dias']) : 30;
+                $fechaVencimiento = date('Y-m-d', strtotime($fechaInicio . " + $dias days"));
+            }
             $notas = trim($data['notas'] ?? '');
 
             // Determinar estado según fecha
@@ -215,7 +221,131 @@ switch ($method) {
             ]);
         }
 
-        // 4. Agregar un nuevo slot de perfil a una cuenta
+        // 4. Acciones Masivas: Eliminar múltiples perfiles
+        if ($action === 'bulk_delete') {
+            $ids = isset($data['ids']) && is_array($data['ids']) ? array_map('intval', $data['ids']) : [];
+            $ids = array_values(array_filter($ids, function($v) { return $v > 0; }));
+            if (empty($ids)) jsonError('No se indicaron perfiles para eliminar.', 422);
+
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $del = $db->prepare("DELETE FROM perfiles WHERE id IN ($placeholders)");
+            $del->execute($ids);
+            $deletedCount = $del->rowCount();
+
+            jsonResponse([
+                'success' => true,
+                'message' => "Se eliminaron {$deletedCount} perfil(es) correctamente.",
+                'deleted_count' => $deletedCount
+            ]);
+        }
+
+        // 5. Acciones Masivas: Archivar / Desarchivar múltiples perfiles
+        if ($action === 'bulk_archive') {
+            $ids = isset($data['ids']) && is_array($data['ids']) ? array_map('intval', $data['ids']) : [];
+            $ids = array_values(array_filter($ids, function($v) { return $v > 0; }));
+            if (empty($ids)) jsonError('No se indicaron perfiles para archivar.', 422);
+
+            $archivar = isset($data['archivar']) ? (bool)$data['archivar'] : true;
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+
+            if ($archivar) {
+                $stmt = $db->prepare("UPDATE perfiles SET estado = 'archivado' WHERE id IN ($placeholders)");
+                $stmt->execute($ids);
+                $affected = $stmt->rowCount();
+                $msg = "Se archivaron {$affected} perfil(es) correctamente.";
+            } else {
+                // Desarchivar: restaurar estado según asignación y vencimiento
+                $stmt = $db->prepare("
+                    UPDATE perfiles SET 
+                        estado = CASE 
+                            WHEN cliente_id IS NULL THEN 'disponible'
+                            WHEN fecha_vencimiento IS NOT NULL AND fecha_vencimiento < CURDATE() THEN 'vencido'
+                            WHEN fecha_vencimiento IS NOT NULL AND fecha_vencimiento <= DATE_ADD(CURDATE(), INTERVAL 3 DAY) THEN 'por_vencer'
+                            ELSE 'ocupado'
+                        END
+                    WHERE id IN ($placeholders)
+                ");
+                $stmt->execute($ids);
+                $affected = $stmt->rowCount();
+                syncExpirationStates($db);
+                $msg = "Se desarchivaron y restauraron {$affected} perfil(es) correctamente.";
+            }
+
+            jsonResponse([
+                'success' => true,
+                'message' => $msg,
+                'affected_count' => $affected
+            ]);
+        }
+
+        // 6. Acciones Masivas: Edición masiva de perfiles
+        if ($action === 'bulk_edit') {
+            $ids = isset($data['ids']) && is_array($data['ids']) ? array_map('intval', $data['ids']) : [];
+            $ids = array_values(array_filter($ids, function($v) { return $v > 0; }));
+            if (empty($ids)) jsonError('No se indicaron perfiles para editar.', 422);
+
+            $fields = $data['fields'] ?? [];
+            if (empty($fields) || !is_array($fields)) {
+                jsonError('No se proporcionaron campos para actualizar.', 422);
+            }
+
+            $setClauses = [];
+            $setParams = [];
+
+            if (isset($fields['precio_mensual']) && $fields['precio_mensual'] !== '') {
+                $setClauses[] = "precio_mensual = ?";
+                $setParams[] = floatval($fields['precio_mensual']);
+            }
+
+            if (isset($fields['pin_perfil']) && $fields['pin_perfil'] !== '') {
+                $setClauses[] = "pin_perfil = ?";
+                $setParams[] = trim($fields['pin_perfil']);
+            }
+
+            if (!empty($fields['dispositivo']) && in_array($fields['dispositivo'], ['tv', 'android', 'iphone', 'pc', 'otro'])) {
+                $setClauses[] = "dispositivo = ?";
+                $setParams[] = $fields['dispositivo'];
+            }
+
+            if (!empty($fields['fecha_vencimiento'])) {
+                $setClauses[] = "fecha_vencimiento = ?";
+                $setParams[] = $fields['fecha_vencimiento'];
+            }
+
+            if (!empty($fields['dias_adicionales']) && intval($fields['dias_adicionales']) > 0) {
+                $diasAdd = intval($fields['dias_adicionales']);
+                $setClauses[] = "fecha_vencimiento = CASE 
+                    WHEN fecha_vencimiento IS NOT NULL AND fecha_vencimiento > CURDATE() 
+                        THEN DATE_ADD(fecha_vencimiento, INTERVAL {$diasAdd} DAY) 
+                    ELSE DATE_ADD(CURDATE(), INTERVAL {$diasAdd} DAY) 
+                END";
+            }
+
+            if (isset($fields['notas']) && $fields['notas'] !== '') {
+                $setClauses[] = "notas = ?";
+                $setParams[] = trim($fields['notas']);
+            }
+
+            if (empty($setClauses)) {
+                jsonError('No se seleccionó ningún campo válido para aplicar a los perfiles seleccionados.', 422);
+            }
+
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $sql = "UPDATE perfiles SET " . implode(', ', $setClauses) . " WHERE id IN ($placeholders)";
+            $stmt = $db->prepare($sql);
+            $stmt->execute(array_merge($setParams, $ids));
+            $affected = $stmt->rowCount();
+
+            syncExpirationStates($db);
+
+            jsonResponse([
+                'success' => true,
+                'message' => "Se actualizaron {$affected} perfil(es) exitosamente.",
+                'affected_count' => $affected
+            ]);
+        }
+
+        // 7. Agregar un nuevo slot de perfil a una cuenta
         $cuentaId = intval($data['cuenta_id'] ?? 0);
         if ($cuentaId <= 0) jsonError('ID de cuenta requerido para agregar perfil.', 422);
 
