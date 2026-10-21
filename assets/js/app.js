@@ -2058,7 +2058,7 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
                     <span class="summary-user truncate">👤 ${c.correo || pf?.cuenta_correo || ''}</span>
                 </div>
                 <div class="summary-bottom-line">
-                    <span>Vigencia Cuenta Maestra: <strong style="color:#fff;">${c.fecha_vencimiento || pf?.cuenta_vencimiento}</strong></span>
+                    <span>Vigencia Cuenta Maestra: <strong style="color:var(--heading-color);">${c.fecha_vencimiento || pf?.cuenta_vencimiento}</strong></span>
                     <span class="days-tag ${daysClass}">${daysText}</span>
                 </div>
             </div>
@@ -3024,7 +3024,7 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
                 <div class="role-card">
                     <div class="role-card-header">
                         <div>
-                            <div class="role-card-name">${this.escapeHtml(r.nombre)} ${isMasterRole ? '<span class="role-badge-system" style="font-size:0.65rem; background:rgba(99,102,241,0.2); color:#a5b4fc; padding:2px 6px; border-radius:4px; margin-left:6px;">Sistema</span>' : ''}</div>
+                            <div class="role-card-name">${this.escapeHtml(r.nombre)} ${isMasterRole ? '<span class="role-badge-system" style="font-size:0.65rem; background:var(--accent-soft); color:var(--accent); border:1px solid var(--border-highlight); padding:2px 6px; border-radius:4px; margin-left:6px;">Sistema</span>' : ''}</div>
                             <p class="role-card-desc">${this.escapeHtml(r.descripcion || 'Sin descripción')}</p>
                         </div>
                     </div>
@@ -3041,7 +3041,7 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
                                 <span>Permisos</span>
                             </button>
                             ${!isMasterRole ? `
-                            <button type="button" class="btn-card-act" style="color:#f87171;" onclick="App.deleteRole(${r.id}, '${this.escapeHtml(r.nombre)}', ${r.usuarios_count || 0})">
+                            <button type="button" class="btn-card-act danger" onclick="App.deleteRole(${r.id}, '${this.escapeHtml(r.nombre)}', ${r.usuarios_count || 0})">
                                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                             </button>` : ''}
                         </div>
@@ -3297,8 +3297,8 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
                         <div class="ota-status-inner alert">
                             <div class="ota-status-icon">❌</div>
                             <div>
-                                <strong style="color:#ef4444; font-size:1rem;">Error de Conexión con GitHub</strong>
-                                <p style="margin:4px 0 6px 0; color:#e2e8f0; font-size:0.86rem;">${this.escapeHtml(res.message || 'No se pudo contactar con GitHub')}</p>
+                                <strong style="color:var(--danger); font-size:1rem;">Error de Conexión con GitHub</strong>
+                                <p style="margin:4px 0 6px 0; color:var(--text-primary); font-size:0.86rem;">${this.escapeHtml(res.message || 'No se pudo contactar con GitHub')}</p>
                                 <small class="text-muted">Si el repositorio es público, deja el campo de Token vacío.</small>
                             </div>
                         </div>
@@ -3323,8 +3323,8 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
                         <div class="ota-status-inner warn">
                             <div class="ota-status-icon">⚠️</div>
                             <div>
-                                <strong style="color:#fbbf24; font-size:1rem;">Repositorio conectado (${this.escapeHtml(repo)})</strong>
-                                <p style="margin:4px 0 6px 0; color:#e2e8f0; font-size:0.86rem;">${this.escapeHtml(res.message)}</p>
+                                <strong style="color:var(--warning); font-size:1rem;">Repositorio conectado (${this.escapeHtml(repo)})</strong>
+                                <p style="margin:4px 0 6px 0; color:var(--text-primary); font-size:0.86rem;">${this.escapeHtml(res.message)}</p>
                                 <small class="text-muted">Rama monitoreada: <code>${this.escapeHtml(branch)}</code> | Versión actual instalada: <code>v${this.escapeHtml(res.current_version || '2.8.2')}</code></small>
                             </div>
                         </div>
@@ -3342,11 +3342,11 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
                         <div class="ota-status-inner alert">
                             <div class="ota-status-icon">🚀</div>
                             <div style="flex:1;">
-                                <strong style="color:#38bdf8; font-size:1rem;">¡Actualización disponible en GitHub!</strong>
-                                <p style="margin:4px 0 8px 0; color:#e2e8f0; font-size:0.88rem;"><strong>Commit [${this.escapeHtml(c.short_sha)}]:</strong> ${this.escapeHtml(c.message)}</p>
+                                <strong style="color:var(--accent); font-size:1rem;">¡Actualización disponible en GitHub!</strong>
+                                <p style="margin:4px 0 8px 0; color:var(--text-primary); font-size:0.88rem;"><strong>Commit [${this.escapeHtml(c.short_sha)}]:</strong> ${this.escapeHtml(c.message)}</p>
                                 <div style="font-size:0.78rem; color:var(--text-muted); display:flex; gap:16px; flex-wrap:wrap;">
-                                    <span>Autor: <strong style="color:#fff;">${this.escapeHtml(c.author)}</strong></span>
-                                    <span>Fecha: <strong style="color:#fff;">${c.date ? c.date.substring(0, 10) : ''}</strong></span>
+                                    <span>Autor: <strong style="color:var(--heading-color);">${this.escapeHtml(c.author)}</strong></span>
+                                    <span>Fecha: <strong style="color:var(--heading-color);">${c.date ? c.date.substring(0, 10) : ''}</strong></span>
                                     <span>Versión actual: <strong>v${this.escapeHtml(res.current_version || '2.8.2')}</strong></span>
                                 </div>
                             </div>
@@ -3363,8 +3363,8 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
                         <div class="ota-status-inner success">
                             <div class="ota-status-icon">✅</div>
                             <div>
-                                <strong style="color:#10b981; font-size:1rem;">Sistema Actualizado</strong>
-                                <p style="margin:4px 0 6px 0; color:#e2e8f0; font-size:0.86rem;">Tu instalación de StreamManager Pro tiene sincronizados los cambios más recientes de la rama <code>${this.escapeHtml(branch)}</code>.</p>
+                                <strong style="color:var(--success); font-size:1rem;">Sistema Actualizado</strong>
+                                <p style="margin:4px 0 6px 0; color:var(--text-primary); font-size:0.86rem;">Tu instalación de StreamManager Pro tiene sincronizados los cambios más recientes de la rama <code>${this.escapeHtml(branch)}</code>.</p>
                                 <small class="text-muted">Versión activa: <code>v${this.escapeHtml(activeVer)}</code> | Commit: <code>${this.escapeHtml(latestSha)}</code></small>
                             </div>
                         </div>

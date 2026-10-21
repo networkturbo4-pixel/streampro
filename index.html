@@ -33,7 +33,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 
     <!-- CSS del Sistema -->
-    <link rel="stylesheet" href="assets/css/style.css?v=3.1.0">
+    <link rel="stylesheet" href="assets/css/style.css?v=3.2.0">
 </head>
 <body>
 
@@ -1320,7 +1320,7 @@
                     <div class="permissions-matrix-wrapper">
                         <div class="matrix-header">
                             <div>
-                                <h4 style="font-size:0.92rem; font-weight:700; color:#fff;">Matriz de Permisos por Módulo</h4>
+                                <h4 style="font-size:0.92rem; font-weight:700; color:var(--heading-color);">Matriz de Permisos por Módulo</h4>
                                 <p style="font-size:0.75rem; color:var(--text-muted);">Activa o desactiva qué puede realizar este rol en cada sección.</p>
                             </div>
                             <div style="display:flex; gap:8px;">
@@ -1486,12 +1486,12 @@
                         </label>
                         <div class="bulk-field-input" id="bulk-group-dispositivo" style="display:none; margin-top:10px;">
                             <div class="input-box">
-                                <select id="bulk-val-dispositivo" style="width:100%; background:transparent; border:none; color:#fff; outline:none; font-size:0.9rem;">
-                                    <option value="tv" style="background:#111827; color:#fff;">📺 Smart TV</option>
-                                    <option value="android" style="background:#111827; color:#fff;">📱 Móvil Android</option>
-                                    <option value="iphone" style="background:#111827; color:#fff;">🍏 iPhone / iPad</option>
-                                    <option value="pc" style="background:#111827; color:#fff;">💻 PC / Laptop</option>
-                                    <option value="otro" style="background:#111827; color:#fff;">🔌 Otro Dispositivo</option>
+                                <select id="bulk-val-dispositivo">
+                                    <option value="tv">📺 Smart TV</option>
+                                    <option value="android">📱 Móvil Android</option>
+                                    <option value="iphone">🍏 iPhone / iPad</option>
+                                    <option value="pc">💻 PC / Laptop</option>
+                                    <option value="otro">🔌 Otro Dispositivo</option>
                                 </select>
                             </div>
                         </div>
@@ -1507,10 +1507,10 @@
                         <div class="bulk-field-input" id="bulk-group-venc" style="display:none; margin-top:10px;">
                             <div style="display:flex; flex-direction:column; gap:10px;">
                                 <div style="display:flex; gap:16px; align-items:center;">
-                                    <label style="font-size:0.85rem; color:#cbd5e1; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                    <label style="font-size:0.85rem; color:var(--text-secondary); display:flex; align-items:center; gap:6px; cursor:pointer;">
                                         <input type="radio" name="bulk_venc_mode" value="dias" checked> <span>Sumar días</span>
                                     </label>
-                                    <label style="font-size:0.85rem; color:#cbd5e1; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                                    <label style="font-size:0.85rem; color:var(--text-secondary); display:flex; align-items:center; gap:6px; cursor:pointer;">
                                         <input type="radio" name="bulk_venc_mode" value="fecha"> <span>Fecha fija</span>
                                     </label>
                                 </div>
@@ -1547,9 +1547,9 @@
     </div>
 
     <!-- Scripts del Sistema -->
-    <script src="assets/js/api.js?v=3.1.0"></script>
-    <script src="assets/js/auth.js?v=3.1.0"></script>
-    <script src="assets/js/app.js?v=3.1.0"></script>
+    <script src="assets/js/api.js?v=3.2.0"></script>
+    <script src="assets/js/auth.js?v=3.2.0"></script>
+    <script src="assets/js/app.js?v=3.2.0"></script>
     <script src="assets/js/pwa.js?v=1.0.5"></script>
 </body>
 </html>
