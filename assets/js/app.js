@@ -672,7 +672,7 @@ const App = {
                 alertList.innerHTML = `
                     <div style="text-align: center; padding: 26px 16px; color: var(--text-muted); background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-color); width: 100%; max-width: 100%; box-sizing: border-box; word-break: break-word;">
                         <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#10b981" stroke-width="2" style="margin-bottom:8px;"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
-                        <div style="font-weight: 700; color:#fff; font-size:1rem;">¡Todo al día!</div>
+                        <div style="font-weight: 700; color:var(--heading-color); font-size:1rem;">¡Todo al día!</div>
                         <div style="font-size: 0.82rem; margin-top:4px;">No hay cuentas ni perfiles próximos a vencer en los siguientes 4 días.</div>
                     </div>
                 `;
@@ -713,7 +713,7 @@ const App = {
             container.innerHTML = `
                 <div style="grid-column: 1 / -1; text-align: center; padding: 40px 16px; color: var(--text-muted); background: var(--bg-card); border-radius: var(--radius-lg); border: 1px dashed var(--border-color); width: 100%; max-width: 100%; box-sizing: border-box; word-break: break-word;">
                     <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:12px; opacity:0.5;"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
-                    <p style="font-weight:700; color:#fff; font-size:1.05rem;">No se encontraron cuentas de streaming</p>
+                    <p style="font-weight:700; color:var(--heading-color); font-size:1.05rem;">No se encontraron cuentas de streaming</p>
                     <p style="font-size:0.85rem; margin-top:4px;">Prueba ajustando los filtros o registra una nueva cuenta.</p>
                 </div>
             `;
@@ -1066,7 +1066,7 @@ const App = {
                     <td colspan="7">
                         <div class="empty-state-box">
                             <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:12px; opacity:0.6;"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                            <div style="font-weight:700; color:#fff; font-size:1.05rem;">No se encontraron perfiles o pantallas</div>
+                            <div style="font-weight:700; color:var(--heading-color); font-size:1.05rem;">No se encontraron perfiles o pantallas</div>
                             <div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">Prueba ajustando los filtros o el buscador.</div>
                         </div>
                     </td>
@@ -1552,9 +1552,10 @@ const App = {
                             WhatsApp
                         </button>
                         <button class="btn-card-act" onclick="App.openEditClientModal(${cl.id})">
-                            Editar
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            <span>Editar</span>
                         </button>
-                        <button class="btn-card-act" style="color:#f87171; flex:unset; padding: 8px 12px;" onclick="App.eliminarCliente(${cl.id})">
+                        <button class="btn-card-act danger" style="flex:unset; padding: 8px 12px;" onclick="App.eliminarCliente(${cl.id})" title="Eliminar cliente">
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                         </button>
                     </div>
@@ -1607,20 +1608,20 @@ const App = {
                         <div class="cred-row">
                             <span class="cred-label">COLOR IDENTIFICADOR</span>
                             <div class="cred-value" style="display:flex; align-items:center; gap:8px;">
-                                <span style="width:16px; height:16px; border-radius:4px; background:${p.color_hex}; display:inline-block; border:1px solid rgba(255,255,255,0.2);"></span>
-                                <code>${p.color_hex}</code>
+                                <span style="width:16px; height:16px; border-radius:4px; background:${p.color_hex}; display:inline-block; border:1px solid rgba(148,163,184,0.35);"></span>
+                                <code class="cred-text-user">${p.color_hex}</code>
                             </div>
                         </div>
                         <div class="cred-row">
                             <span class="cred-label">PANTALLAS POR CUENTA</span>
                             <div class="cred-value">
-                                <span>Hasta <strong>${p.max_perfiles}</strong> perfiles</span>
+                                <span class="cred-text-user">Hasta <strong>${p.max_perfiles}</strong> perfiles</span>
                             </div>
                         </div>
                         <div class="cred-row">
                             <span class="cred-label">PRECIO SUGERIDO</span>
                             <div class="cred-value">
-                                <span style="color:#34d399; font-weight:700;">S/ ${parseFloat(p.precio_sugerido || 0).toFixed(2)}</span>
+                                <span class="cred-price-val">S/ ${parseFloat(p.precio_sugerido || 0).toFixed(2)}</span>
                             </div>
                         </div>
                     </div>
@@ -1628,11 +1629,11 @@ const App = {
                     <div class="card-bottom-bar" style="margin-top:auto; padding-top:12px;">
                         <button class="btn-card-act" onclick="App.openPlatformModal(${p.id})">
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                            Editar
+                            <span>Editar</span>
                         </button>
-                        <button class="btn-card-act" style="color:#f87171;" onclick="App.eliminarPlataforma(${p.id}, '${p.nombre.replace(/'/g, "\\'")}', ${totalCuentas})">
+                        <button class="btn-card-act danger" onclick="App.eliminarPlataforma(${p.id}, '${p.nombre.replace(/'/g, "\\'")}', ${totalCuentas})">
                             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                            Eliminar
+                            <span>Eliminar</span>
                         </button>
                     </div>
                 </div>
@@ -1656,7 +1657,7 @@ const App = {
             container.innerHTML = `
                 <div style="text-align: center; padding: 36px 16px; color: var(--text-muted); background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-color); width: 100%; max-width: 100%; box-sizing: border-box; word-break: break-word;">
                     <svg viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="#10b981" stroke-width="2" style="margin-bottom:12px;"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg>
-                    <h3 style="color:#fff; font-size:1.15rem; font-weight:800;">¡No hay vencimientos próximos!</h3>
+                    <h3 style="color:var(--heading-color); font-size:1.15rem; font-weight:800;">¡No hay vencimientos próximos!</h3>
                     <p style="margin-top:6px; font-size:0.85rem; line-height: 1.4;">Todas tus cuentas y perfiles asignados tienen más de 4 días de vigencia activa.</p>
                 </div>
             `;
