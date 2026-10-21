@@ -629,25 +629,36 @@ const App = {
         // Render Grilla Plataformas en Dashboard
         const platGrid = document.getElementById('dash-plataformas-grid');
         if (platGrid && d.plataformas) {
-            platGrid.innerHTML = d.plataformas.map(p => `
-                <div class="stat-card" style="border-top: 3px solid ${p.color_hex};">
+            platGrid.innerHTML = d.plataformas.map(p => {
+                const occ = parseInt(p.perfiles_ocupados || 0);
+                const tot = parseInt(p.total_perfiles || 0);
+                const pct = tot > 0 ? Math.min(100, Math.round((occ / tot) * 100)) : 0;
+                return `
+                <div class="stat-card platform-bento-card" style="--plat-color: ${p.color_hex};">
                     <div class="stat-card-top">
-                        <span style="font-weight: 800; color: #fff; font-size: 0.95rem;">${p.nombre}</span>
-                        <span class="stat-card-tag" style="background: ${p.color_hex}22; color: ${p.color_hex};">
-                            ${p.total_cuentas} cuentas
+                        <div class="platform-bento-brand">
+                            <span class="platform-bento-dot" style="background: ${p.color_hex}; box-shadow: 0 0 10px ${p.color_hex}88;"></span>
+                            <span class="platform-bento-name">${p.nombre}</span>
+                        </div>
+                        <span class="stat-card-tag" style="background: ${p.color_hex}18; color: ${p.color_hex}; border: 1px solid ${p.color_hex}35;">
+                            ${p.total_cuentas} ${p.total_cuentas == 1 ? 'cuenta' : 'cuentas'}
                         </span>
                     </div>
-                    <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                    <div class="platform-bento-body">
                         <div>
-                            <div style="font-size: 1.4rem; font-weight: 800; color: #fff;">${p.perfiles_ocupados || 0} <span style="font-size:0.85rem; color:var(--text-muted);">/ ${p.total_perfiles || 0} perfiles</span></div>
-                            <div style="font-size: 0.78rem; color: var(--text-secondary);">Pantallas ocupadas</div>
+                            <div class="platform-bento-val">${occ} <span class="platform-bento-tot">/ ${tot}</span></div>
+                            <div class="platform-bento-sub">Pantallas activas (${pct}%)</div>
                         </div>
-                        <button class="btn-card-act" style="flex:unset; padding: 6px 12px;" onclick="App.filterByPlatformAndGo(${p.id})">
-                            Ver
+                        <button class="btn-card-act platform-bento-btn" onclick="App.filterByPlatformAndGo(${p.id})">
+                            <span>Filtrar</span>
+                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                         </button>
                     </div>
+                    <div class="stat-progress" style="margin-top: 12px; height: 4px;">
+                        <div class="stat-progress-bar" style="width: ${pct}%; background: ${p.color_hex};"></div>
+                    </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         // Render Alertas Urgentes en Dashboard
@@ -2769,7 +2780,13 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
         const container = document.getElementById('users-cards-grid');
         if (!container) return;
 
-        const searchTerm = (document.getElementById('search-users-input')?.value || '').toLowerCase().trim();
+        const searchEl = document.getElementById('search-users-input');
+        // Evitar que el autorrelleno automático del navegador filtre por el correo guardado sin intervención del usuario
+        if (searchEl && !searchEl.dataset.userTyped && searchEl.value) {
+            searchEl.value = '';
+        }
+
+        const searchTerm = (searchEl?.value || '').toLowerCase().trim();
         const users = this.state.users || [];
 
         const filtered = users.filter(u => {
@@ -2785,8 +2802,8 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
             container.innerHTML = `
                 <div class="empty-state-card" style="grid-column: 1 / -1; padding: 40px; text-align: center;">
                     <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--text-muted); margin-bottom:12px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
-                    <h4 style="color:#fff; font-size:1.1rem; margin-bottom:6px;">No se encontraron usuarios</h4>
-                    <p style="color:var(--text-muted); font-size:0.85rem;">Prueba con otro término de búsqueda o crea un nuevo usuario.</p>
+                    <h4 style="color:var(--text-primary); font-size:1.05rem; margin-bottom:6px;">No se encontraron usuarios</h4>
+                    <p style="color:var(--text-muted); font-size:0.85rem;">Prueba con otro término de búsqueda o registra un nuevo miembro del equipo.</p>
                 </div>
             `;
             return;
@@ -2803,9 +2820,15 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
             return `
                 <div class="user-card ${!isActive ? 'inactive' : ''}">
                     <div class="user-card-header">
-                        <div class="user-avatar-circle">${initials}</div>
+                        <div class="user-avatar-circle">
+                            <span>${initials}</span>
+                            <span class="user-status-dot ${isActive ? 'online' : 'offline'}"></span>
+                        </div>
                         <div class="user-info-text">
-                            <div class="user-info-name truncate">${this.escapeHtml(u.nombre)} ${isSelf ? '<span class="user-tag-you" style="font-size:0.65rem; background:#6366f1; color:#fff; padding:1px 5px; border-radius:4px; margin-left:4px;">Tú</span>' : ''}</div>
+                            <div class="user-info-name truncate">
+                                <span>${this.escapeHtml(u.nombre)}</span>
+                                ${isSelf ? '<span class="user-tag-you">Tú</span>' : ''}
+                            </div>
                             <div class="user-info-email truncate">${this.escapeHtml(u.email)}</div>
                         </div>
                     </div>
@@ -2816,27 +2839,34 @@ Si deseas renovar tu servicio para continuar disfrutando sin interrupciones, res
                             <span>${this.escapeHtml(u.rol_nombre || 'Sin Rol')}</span>
                         </span>
                         <span class="badge-user-status ${isActive ? 'activo' : 'inactivo'}">
-                            ${isActive ? '● Activo' : '○ Inactivo'}
+                            <span class="status-mini-dot"></span>
+                            <span>${isActive ? 'Activo' : 'Inactivo'}</span>
                         </span>
                     </div>
 
-                    ${u.telefono ? `
-                    <div style="font-size:0.78rem; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
-                        <span>📱 WhatsApp:</span>
-                        <a href="https://wa.me/${u.telefono.replace(/\D/g, '')}" target="_blank" style="color:#38bdf8; text-decoration:none;">
-                            ${this.escapeHtml(u.telefono)}
-                        </a>
-                    </div>` : ''}
+                    <div class="user-meta-list">
+                        <div class="user-meta-item">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <span>Último acceso: <strong>${u.ultimo_login ? u.ultimo_login.substring(0, 16) : 'Nunca'}</strong></span>
+                        </div>
+                        ${u.telefono ? `
+                        <div class="user-meta-item">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                            <a href="https://wa.me/${u.telefono.replace(/\D/g, '')}" target="_blank" class="user-wa-link">
+                                ${this.escapeHtml(u.telefono)}
+                            </a>
+                        </div>` : ''}
+                    </div>
 
                     <div class="user-card-footer">
-                        <span>Acceso: <strong>${u.ultimo_login ? u.ultimo_login.substring(0, 16) : 'Nunca'}</strong></span>
+                        <span class="user-id-tag">ID #${u.id}</span>
                         <div class="user-card-actions">
                             <button type="button" class="btn-card-act" onclick="App.openUserModal(${u.id})">
                                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                                 <span>Editar</span>
                             </button>
                             ${!isMaster && !isSelf ? `
-                            <button type="button" class="btn-card-act" style="color:#f87171;" onclick="App.deleteUser(${u.id}, '${this.escapeHtml(u.nombre)}')">
+                            <button type="button" class="btn-card-act danger" onclick="App.deleteUser(${u.id}, '${this.escapeHtml(u.nombre)}')" title="Eliminar usuario">
                                 <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                             </button>` : ''}
                         </div>
